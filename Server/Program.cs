@@ -1,3 +1,14 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using System;
 
-Console.WriteLine("Hello, World!");
+namespace Server {
+    class Program {
+        static void Main( string[ ] args ) {
+            var echo = new EchoServer();
+
+            echo.Start( );
+
+            Console.WriteLine( "Echo Server running" );
+            Console.ReadLine( );
+        }
+    }
+}
