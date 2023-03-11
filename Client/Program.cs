@@ -3,9 +3,15 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Client {
 
+	public class MyMessage
+	{
+		[JsonProperty("message")]
+		public string Message { get; set; }
+	}
 class Program {
 
 // Main Method
