@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "GKHKbdGljvEC9QqJcFrjKlamQ1NLkq3FvjQUuilzKp4DgbGgTtos0wtfOTCkLu5kIzwQC6T9FiO7Wrsvg1mvOg==",
+  "dgSpecHash": "Pyuj0AowBkT+4zN9G2ssyRZrYCIHTywYfTQ3Pzhkucm6HtZLqZiwigTzf90V13UiFGhob6BI+/cPnlX+w4x5PQ==",
   "success": true,
   "projectFilePath": "/Users/piotrszymala/RiderProjects/SocketProgramming/Shared/Shared.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/Users/piotrszymala/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
   "logs": []
 }

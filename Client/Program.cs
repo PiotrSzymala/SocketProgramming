@@ -1,101 +1,93 @@
-﻿using System;
-using System.IO;
+﻿// A C# program for Client
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace Client {
 
-    public class MyMessage {
-        public string StringProperty { get; set; }
-        public int IntProperty { get; set; }
-    }
-    
-    class Program {
+class Program {
 
-        static async Task SendAsync<T>( NetworkStream networkStream, T message ) {
-            var (header, body) = Encode( message );
-            await networkStream.WriteAsync( header, 0, header.Length ).ConfigureAwait( false );
-            await networkStream.WriteAsync( body, 0, body.Length ).ConfigureAwait( false );
-        }
+// Main Method
+static void Main(string[] args)
+{
+	ExecuteClient();
+}
 
-        static async Task<T> ReceiveAsync<T>( NetworkStream networkStream ) {
+// ExecuteClient() Method
+static void ExecuteClient()
+{
 
-            var headerBytes = await ReadAsync(networkStream, 4);
-            var bodyLength = IPAddress.NetworkToHostOrder( BitConverter.ToInt32(headerBytes) );
+	try {
+		
+		// Establish the remote endpoint
+		// for the socket. This example
+		// uses port 11111 on the local
+		// computer.
+		IPHostEntry ipHost = Dns.GetHostEntry(Dns.GetHostName());
+		IPAddress ipAddr = ipHost.AddressList[0];
+		IPEndPoint localEndPoint = new IPEndPoint(ipAddr, 11111);
 
-            var bodyBytes = await ReadAsync(networkStream, bodyLength);
+		// Creation TCP/IP Socket using
+		// Socket Class Constructor
+		Socket sender = new Socket(ipAddr.AddressFamily,
+				SocketType.Stream, ProtocolType.Tcp);
 
-            return Decode<T>( bodyBytes );
-        }
+		try {
+			
+			// Connect Socket to the remote
+			// endpoint using method Connect()
+			sender.Connect(localEndPoint);
 
-        static (byte[ ] header, byte[ ] body) Encode<T>( T message ) {
-            var xs = new XmlSerializer(typeof(T));
-            var sb = new StringBuilder();
-            var sw = new StringWriter(sb);
-            xs.Serialize( sw, message );
+			// We print EndPoint information
+			// that we are connected
+			Console.WriteLine("Socket connected to -> {0} ",
+						sender.RemoteEndPoint.ToString());
 
-            var bodyBytes = Encoding.UTF8.GetBytes(sb.ToString());
-            var headerBytes = BitConverter.GetBytes( IPAddress.HostToNetworkOrder( bodyBytes.Length ));
+			// Creation of message that
+			// we will send to Server
+			byte[] messageSent = Encoding.ASCII.GetBytes("Test Client<EOF>");
+			int byteSent = sender.Send(messageSent);
 
-            return (headerBytes, bodyBytes);
-        }
+			// Data buffer
+			byte[] messageReceived = new byte[1024];
 
-        static T Decode<T>( byte[ ] body ) {
-            var str = Encoding.UTF8.GetString(body);
-            var sr = new StringReader(str);
-            var xs = new XmlSerializer(typeof(T));
-            return ( T )xs.Deserialize( sr );
-        }
+			// We receive the message using
+			// the method Receive(). This
+			// method returns number of bytes
+			// received, that we'll use to
+			// convert them to string
+			int byteRecv = sender.Receive(messageReceived);
+			Console.WriteLine("Message from Server -> {0}",
+				Encoding.ASCII.GetString(messageReceived,
+											0, byteRecv));
 
-        static async Task<byte[ ]> ReadAsync( NetworkStream networkStream, int bytesToRead ) {
-            var buffer = new byte[bytesToRead];
-            var bytesRead = 0;
-            while( bytesRead < bytesToRead ) {
-                var bytesReceived = await networkStream.ReadAsync( buffer, bytesRead, ( bytesToRead - bytesRead ) ).ConfigureAwait( false );
-                if( bytesReceived == 0 )
-                    throw new Exception( "Socket Closed" );
-                bytesRead += bytesReceived;
-            }
-            return buffer;
-        }
-
-
-
-        static async Task Main( string[ ] args ) {
-
-            Console.WriteLine( "Press Enter to Connect" );
-            Console.ReadLine( );
-
-
-            var endpoint = new IPEndPoint(IPAddress.Loopback, 9000);
-            var socket = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            socket.Connect( endpoint );
-            var networkStream = new NetworkStream(socket, true);
-
-            var myMessage = new MyMessage {
-                IntProperty = 404,
-                StringProperty = "Hello World"
-            };
-
-            Console.WriteLine( "Sending" );
-            Print( myMessage ); 
-
-            await SendAsync( networkStream, myMessage ).ConfigureAwait( false );
-
-            var responseMsg = await ReceiveAsync<MyMessage>(networkStream).ConfigureAwait(false);
-
-            Console.WriteLine( "Received" );
-            Print( responseMsg );
-
-
-            Console.ReadLine( );
-
-        }
-
-
-        static void Print( MyMessage m ) => Console.WriteLine( $"MyMessage.IntProperty = {m.IntProperty}, MyMessage.StringProperty = {m.StringProperty}" );
-    }
+			// Close Socket using
+			// the method Close()
+			sender.Shutdown(SocketShutdown.Both);
+			sender.Close();
+		}
+		
+		// Manage of Socket's Exceptions
+		catch (ArgumentNullException ane) {
+			
+			Console.WriteLine("ArgumentNullException : {0}", ane.ToString());
+		}
+		
+		catch (SocketException se) {
+			
+			Console.WriteLine("SocketException : {0}", se.ToString());
+		}
+		
+		catch (Exception e) {
+			Console.WriteLine("Unexpected exception : {0}", e.ToString());
+		}
+	}
+	
+	catch (Exception e) {
+		
+		Console.WriteLine(e.ToString());
+	}
+}
+}
 }
