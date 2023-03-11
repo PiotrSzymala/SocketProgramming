@@ -4,7 +4,7 @@ namespace Client;
 
 public class JsonSerializer
 {
-    public string Serialize(MyMessage message)
+    public static string Serialize(MyMessage message)
     {
         var result = JsonConvert.SerializeObject(message);
         
