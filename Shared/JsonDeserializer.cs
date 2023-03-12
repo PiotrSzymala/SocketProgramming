@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
-using Shared;
 
-namespace Server;
+namespace Shared;
 
 public static class JsonDeserializer
 {

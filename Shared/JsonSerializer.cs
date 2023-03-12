@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
-using Shared;
 
-namespace Client;
+namespace Shared;
 
 public static class JsonSerializer
 {

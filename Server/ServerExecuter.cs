@@ -21,7 +21,9 @@ public static class ServerExecuter
 
                 using Socket clientSocket = listener.Accept();
 
-                Message = Encoding.ASCII.GetBytes($"Enter command (type \"help\" to check available commands): ");
+                Console.WriteLine("Connected");
+
+                Message = Encoding.ASCII.GetBytes("\nEnter command (type \"help\" to check available commands): \n\n");
                 clientSocket.Send(Message);
 
                 bool flag = true;
@@ -69,6 +71,9 @@ public static class ServerExecuter
                 break;
 
             case "stop":
+                toSend = Commands.StopCommand();
+                clientSocket.Send(toSend);
+                
                 clientSocket.Shutdown(SocketShutdown.Both);
                 clientSocket.Close();
 
@@ -77,7 +82,7 @@ public static class ServerExecuter
                 break;
 
             default:
-                toSend = Encoding.ASCII.GetBytes("wrong command");
+                toSend = Commands.WrongCommand();
                 clientSocket.Send(toSend);
                 break;
         }

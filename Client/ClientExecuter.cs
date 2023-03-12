@@ -41,9 +41,13 @@ public static class ClientExecuter
                         byte[] messageReceived = new byte[1024];
                         
                         int byteRecv = sender.Receive(messageReceived);
-                        string result = Encoding.ASCII.GetString(messageReceived,
+                        
+                        string fromServerResult = Encoding.ASCII.GetString(messageReceived,
                             0, byteRecv);
-                        Console.WriteLine($"Message from Server -> {result}");
+                        
+                     var messageFromServer = JsonDeserializer.Deserialize(fromServerResult);
+
+                        Console.WriteLine($"Message from Server -> {messageFromServer.Message}");
                         
                     } while (messageToSent.Message != "stop");
                     
@@ -53,17 +57,17 @@ public static class ClientExecuter
 
                 catch (ArgumentNullException ane)
                 {
-                    Console.WriteLine("ArgumentNullException : {0}", ane);
+                    Console.WriteLine($"ArgumentNullException : {ane}");
                 }
 
                 catch (SocketException se)
                 {
-                    Console.WriteLine("SocketException : {0}", se);
+                    Console.WriteLine($"SocketException : {se}");
                 }
 
                 catch (Exception e)
                 {
-                    Console.WriteLine("Unexpected exception : {0}", e);
+                    Console.WriteLine($"Unexpected exception : {e}");
                 }
             }
 

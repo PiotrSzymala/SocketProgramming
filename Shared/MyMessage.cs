@@ -5,5 +5,5 @@ namespace Shared;
 public class MyMessage
 {
     [JsonProperty("message")]
-    public string Message { get; set; }
+    public string? Message { get; set; }
 }
