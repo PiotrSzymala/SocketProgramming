@@ -7,11 +7,7 @@ using Newtonsoft.Json;
 
 namespace Client {
 
-	public class MyMessage
-	{
-		[JsonProperty("message")]
-		public string Message { get; set; }
-	}
+	
 class Program {
 
 // Main Method
@@ -36,7 +32,7 @@ static void ExecuteClient()
 
 		// Creation TCP/IP Socket using
 		// Socket Class Constructor
-		Socket sender = new Socket(ipAddr.AddressFamily,
+		using Socket sender = new Socket(ipAddr.AddressFamily,
 				SocketType.Stream, ProtocolType.Tcp);
 
 		try {
@@ -49,24 +45,43 @@ static void ExecuteClient()
 			// that we are connected
 			Console.WriteLine("Socket connected to -> {0} ",
 						sender.RemoteEndPoint.ToString());
+			
+			
+			byte[] initialCommand = new byte[1024];
 
+			int initComm = sender.Receive(initialCommand);
+
+			string encodingInitComm = Encoding.ASCII.GetString(initialCommand, 0, initComm);
+			Console.WriteLine(encodingInitComm);
+			
 			// Creation of message that
 			// we will send to Server
-			byte[] messageSent = Encoding.ASCII.GetBytes("Test Client<EOF>");
-			int byteSent = sender.Send(messageSent);
+			MyMessage messageToSent = new MyMessage();
+			do
+			{
 
-			// Data buffer
-			byte[] messageReceived = new byte[1024];
+				messageToSent.Message = Console.ReadLine();
 
-			// We receive the message using
-			// the method Receive(). This
-			// method returns number of bytes
-			// received, that we'll use to
-			// convert them to string
-			int byteRecv = sender.Receive(messageReceived);
-			Console.WriteLine("Message from Server -> {0}",
-				Encoding.ASCII.GetString(messageReceived,
-											0, byteRecv));
+				var toSend = JsonSerializer.Serialize(messageToSent);
+
+				byte[] messageSent = Encoding.ASCII.GetBytes(toSend);
+				int byteSent = sender.Send(messageSent);
+
+				// Data buffer
+				byte[] messageReceived = new byte[1024];
+
+				// We receive the message using
+				// the method Receive(). This
+				// method returns number of bytes
+				// received, that we'll use to
+				// convert them to string
+				int byteRecv = sender.Receive(messageReceived);
+				Console.WriteLine("Message from Server -> {0}",
+					Encoding.ASCII.GetString(messageReceived,
+						0, byteRecv));
+
+				
+			} while (messageToSent.Message != "stop");
 
 			// Close Socket using
 			// the method Close()
