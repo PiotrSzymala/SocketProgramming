@@ -2,11 +2,11 @@ using System.Text;
 
 namespace Server;
 
-public class Commands
+public static class Commands
 {
     public static byte[] UptimeCommand()
     {
-        var result = (DateTime.Now - Server.Program.ServerStartCount).ToString();
+        var result = (DateTime.Now - Program.ServerStartCount).ToString();
 
         byte[] message = Encoding.ASCII.GetBytes($"Running time: {result}");
 

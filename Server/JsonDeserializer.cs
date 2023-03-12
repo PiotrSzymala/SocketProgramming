@@ -1,10 +1,9 @@
-using Client;
 using Newtonsoft.Json;
 using Shared;
 
 namespace Server;
 
-public class JsonDeserializer
+public static class JsonDeserializer
 {
     public static MyMessage Deserialize(string input)
     {

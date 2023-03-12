@@ -4,7 +4,7 @@ using Shared;
 
 namespace Client;
 
-public class ClientExecuter
+public static class ClientExecuter
 {
    public static void ExecuteClient()
         {
@@ -35,7 +35,8 @@ public class ClientExecuter
                         var toSend = JsonSerializer.Serialize(messageToSent);
 
                         byte[] messageSent = Encoding.ASCII.GetBytes(toSend);
-                        int byteSent = sender.Send(messageSent);
+                        
+                        sender.Send(messageSent);
                         
                         byte[] messageReceived = new byte[1024];
                         
@@ -52,17 +53,17 @@ public class ClientExecuter
 
                 catch (ArgumentNullException ane)
                 {
-                    Console.WriteLine("ArgumentNullException : {0}", ane.ToString());
+                    Console.WriteLine("ArgumentNullException : {0}", ane);
                 }
 
                 catch (SocketException se)
                 {
-                    Console.WriteLine("SocketException : {0}", se.ToString());
+                    Console.WriteLine("SocketException : {0}", se);
                 }
 
                 catch (Exception e)
                 {
-                    Console.WriteLine("Unexpected exception : {0}", e.ToString());
+                    Console.WriteLine("Unexpected exception : {0}", e);
                 }
             }
 

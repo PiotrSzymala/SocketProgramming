@@ -4,7 +4,7 @@ using Shared;
 
 namespace Server;
 
-public class ServerExecuter
+public static class ServerExecuter
 {
     private static byte[] Message { get; set; }
     public static void ExecuteServer()
@@ -29,16 +29,14 @@ public class ServerExecuter
                 while (flag)
                 {
                     byte[] bytes = new Byte[1024];
-                    string data = null;
-                    MyMessage received = new MyMessage();
+                    string data = string.Empty;
 
                     int numByte = clientSocket.Receive(bytes);
-
-
+                    
                     data += Encoding.ASCII.GetString(bytes,
                         0, numByte);
 
-                    received = JsonDeserializer.Deserialize(data);
+                    var received = JsonDeserializer.Deserialize(data);
 
                     flag = ChooseOption(received, clientSocket,  flag);
                 }
@@ -57,17 +55,17 @@ public class ServerExecuter
         {
             case "uptime":
                 toSend = Commands.UptimeCommand();
-                clientSocket.Send((byte[])toSend);
+                clientSocket.Send(toSend);
                 break;
 
             case "info":
                 toSend = Commands.InfoCommand();
-                clientSocket.Send((byte[])toSend);
+                clientSocket.Send(toSend);
                 break;
 
             case "help":
                 toSend = Commands.HelpCommand();
-                clientSocket.Send((byte[])toSend);
+                clientSocket.Send(toSend);
                 break;
 
             case "stop":
@@ -80,7 +78,7 @@ public class ServerExecuter
 
             default:
                 toSend = Encoding.ASCII.GetBytes("wrong command");
-                clientSocket.Send((byte[])toSend);
+                clientSocket.Send(toSend);
                 break;
         }
 

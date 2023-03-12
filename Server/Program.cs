@@ -1,18 +1,10 @@
-﻿// A C# Program for Server
-
-using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using Client;
-
-namespace Server
+﻿namespace Server
 {
-    class Program
+    public static class Program
     {
         public static readonly DateTime ServerStartCount = DateTime.Now;
-        
-        static void Main(string[] args)
+
+        private static void Main(string[] args)
         {
             ServerExecuter.ExecuteServer();
         }

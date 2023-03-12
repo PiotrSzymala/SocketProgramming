@@ -3,7 +3,7 @@ using Shared;
 
 namespace Client;
 
-public class JsonSerializer
+public static class JsonSerializer
 {
     public static string Serialize(MyMessage message)
     {
