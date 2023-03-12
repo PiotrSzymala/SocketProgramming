@@ -4,6 +4,23 @@ namespace Server;
 
 public class Commands
 {
+    public static byte[] UptimeCommand()
+    {
+        var result = (DateTime.Now - Server.Program.ServerStartCount).ToString();
+
+        byte[] message = Encoding.ASCII.GetBytes($"$Running time: {result}");
+
+        return message;
+    }
+    public static byte[] InfoCommand()
+    {
+        byte[] message = Encoding.ASCII.GetBytes(
+            $"Sever version number: {ServerInformation.ServerVersion}\n"+
+            $"Server creation date: {ServerInformation.ServerCreationDate}"
+        );
+
+        return message;
+    }
     public static byte[] HelpCommand()
     {
            byte[] message = Encoding.ASCII.GetBytes( 
@@ -15,4 +32,6 @@ public class Commands
 
            return message;
     }
+
+    
 }
