@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Client;
+namespace Shared;
 
 public class MyMessage
 {

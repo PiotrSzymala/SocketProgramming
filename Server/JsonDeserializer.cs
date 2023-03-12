@@ -1,5 +1,6 @@
 using Client;
 using Newtonsoft.Json;
+using Shared;
 
 namespace Server;
 

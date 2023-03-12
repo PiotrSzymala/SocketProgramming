@@ -19,13 +19,27 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v7.0",
         "dependencies": {
-          "Newtonsoft.Json": "13.0.3"
+          "Newtonsoft.Json": "13.0.3",
+          "Shared": "1.0.0"
         },
         "compile": {
           "bin/placeholder/Client.dll": {}
         },
         "runtime": {
           "bin/placeholder/Client.dll": {}
+        }
+      },
+      "Shared/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v7.0",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.3"
+        },
+        "compile": {
+          "bin/placeholder/Shared.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Shared.dll": {}
         }
       }
     }
@@ -65,12 +79,18 @@
       "type": "project",
       "path": "../Client/Client.csproj",
       "msbuildProject": "../Client/Client.csproj"
+    },
+    "Shared/1.0.0": {
+      "type": "project",
+      "path": "../Shared/Shared.csproj",
+      "msbuildProject": "../Shared/Shared.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net7.0": [
       "Client >= 1.0.0",
-      "Newtonsoft.Json >= 13.0.3"
+      "Newtonsoft.Json >= 13.0.3",
+      "Shared >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -100,6 +120,9 @@
           "projectReferences": {
             "/Users/piotrszymala/RiderProjects/SocketProgramming/Client/Client.csproj": {
               "projectPath": "/Users/piotrszymala/RiderProjects/SocketProgramming/Client/Client.csproj"
+            },
+            "/Users/piotrszymala/RiderProjects/SocketProgramming/Shared/Shared.csproj": {
+              "projectPath": "/Users/piotrszymala/RiderProjects/SocketProgramming/Shared/Shared.csproj"
             }
           }
         }

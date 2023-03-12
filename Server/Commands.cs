@@ -8,7 +8,7 @@ public class Commands
     {
         var result = (DateTime.Now - Server.Program.ServerStartCount).ToString();
 
-        byte[] message = Encoding.ASCII.GetBytes($"$Running time: {result}");
+        byte[] message = Encoding.ASCII.GetBytes($"Running time: {result}");
 
         return message;
     }
