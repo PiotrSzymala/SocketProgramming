@@ -13,7 +13,6 @@ public static class Commands
         };
 
         var resultFromServer =JsonSerializer.Serialize(jsonResponse);
-
         byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
 
         return message;
@@ -27,9 +26,8 @@ public static class Commands
         };
 
         var resultFromServer =JsonSerializer.Serialize(jsonResponse);
-        
         byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
-
+        
         return message;
     }
     public static byte[] HelpCommand()
