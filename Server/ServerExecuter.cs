@@ -6,6 +6,7 @@ namespace Server;
 
 public static class ServerExecuter
 {
+    public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static void ExecuteServer()
     {
         using Socket listener = new Socket(Config.IpAddr.AddressFamily,

@@ -7,9 +7,12 @@ public static class Commands
 {
     public static byte[] UptimeCommand()
     {
+        var currentWorkingTime = DateTime.Now;
+        var timeSpan = currentWorkingTime - ServerExecuter.ServerCreationTime;
+        
         MyMessage jsonResponse = new MyMessage
         {
-            Message = $"Running time: {(DateTime.Now - Program.ServerStartCount).ToString()}"
+            Message = $"Running time: {timeSpan}"
         };
 
         var resultFromServer =JsonSerializer.Serialize(jsonResponse);
