@@ -6,54 +6,54 @@ namespace Server;
 
 public static class ServerExecuter
 {
-    private static byte[] Message { get; set; }
     public static void ExecuteServer()
+    {
+        using Socket listener = new Socket(Config.IpAddr.AddressFamily,
+            SocketType.Stream, ProtocolType.Tcp);
+
+        try
         {
-            using Socket listener = new Socket(Config.IpAddr.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
+            listener.Bind(Config.LocalEndPoint);
+            listener.Listen(10);
 
-            try
+            Console.WriteLine("Waiting connection ... ");
+
+            using Socket clientSocket = listener.Accept();
+
+            Console.WriteLine("Connected");
+
+            var message = Encoding.ASCII.GetBytes("\nEnter command: \n\n");
+           
+            clientSocket.Send(message);
+
+            bool flag = true;
+
+            while (flag)
             {
-                listener.Bind(Config.LocalEndPoint);
-                listener.Listen(10);
+                byte[] receivedBytes = new byte[1024];
+                string dataFromClient = string.Empty;
 
-                Console.WriteLine("Waiting connection ... ");
+                int bytesToEncode = clientSocket.Receive(receivedBytes);
 
-                using Socket clientSocket = listener.Accept();
+                dataFromClient += Encoding.ASCII.GetString(receivedBytes,
+                    0, bytesToEncode);
 
-                Console.WriteLine("Connected");
+                var deserializedClientRequest = JsonDeserializer.Deserialize(dataFromClient);
 
-                Message = Encoding.ASCII.GetBytes("\nEnter command (type \"help\" to check available commands): \n\n");
-                clientSocket.Send(Message);
-
-                bool flag = true;
-
-                while (flag)
-                {
-                    byte[] bytes = new Byte[1024];
-                    string data = string.Empty;
-
-                    int numByte = clientSocket.Receive(bytes);
-                    
-                    data += Encoding.ASCII.GetString(bytes,
-                        0, numByte);
-
-                    var received = JsonDeserializer.Deserialize(data);
-
-                    flag = ChooseOption(received, clientSocket,  flag);
-                }
-            }
-
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
+                ChooseOption(deserializedClientRequest, clientSocket, ref flag);
             }
         }
 
-    private static bool ChooseOption(MyMessage received, Socket clientSocket, bool flag)
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Exception: {exception}");
+        }
+    }
+
+    private static void ChooseOption(MyMessage deserializedRequestFromClient, Socket clientSocket, ref bool flag)
     {
         byte[] toSend;
-        switch (received.Message.ToLower())
+        switch (deserializedRequestFromClient.Message.ToLower())
         {
             case "uptime":
                 toSend = Commands.UptimeCommand();
@@ -73,7 +73,7 @@ public static class ServerExecuter
             case "stop":
                 toSend = Commands.StopCommand();
                 clientSocket.Send(toSend);
-                
+
                 clientSocket.Shutdown(SocketShutdown.Both);
                 clientSocket.Close();
 
@@ -86,7 +86,5 @@ public static class ServerExecuter
                 clientSocket.Send(toSend);
                 break;
         }
-
-        return flag;
     }
 }
