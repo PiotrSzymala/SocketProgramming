@@ -1,5 +1,6 @@
 using System.Net.Sockets;
 using System.Text;
+using Newtonsoft.Json;
 using Shared;
 using Shared.Models;
 
@@ -33,7 +34,7 @@ public static class ClientExecuter
                 {
                     commandToSend.Message = Console.ReadLine().ToLower();
 
-                    var serializedCommand = JsonSerializer.Serialize(commandToSend);
+                    var serializedCommand = JsonConvert.SerializeObject(commandToSend);
 
                     byte[] commandInJsonFormat = Encoding.ASCII.GetBytes(serializedCommand);
 
@@ -46,7 +47,7 @@ public static class ClientExecuter
                     string fromServerResult = Encoding.ASCII.GetString(messageReceived,
                         0, bytesReceived);
 
-                    var responseFromServer = JsonDeserializer.Deserialize(fromServerResult);
+                    var responseFromServer = JsonConvert.DeserializeObject<MyMessage>(fromServerResult);
 
                     Console.WriteLine($"Response from Server -> {responseFromServer.Message}");
                     

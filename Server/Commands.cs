@@ -1,5 +1,5 @@
 using System.Text;
-using Shared;
+using Newtonsoft.Json;
 using Shared.Models;
 
 namespace Server;
@@ -16,7 +16,7 @@ public static class Commands
             Message = $"Running time: {timeSpan}"
         };
 
-        var resultFromServer =JsonSerializer.Serialize(jsonResponse);
+        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
         byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
 
         return message;
@@ -29,7 +29,7 @@ public static class Commands
                       $"Server creation date: {ServerInformation.ServerCreationDate}\n"
         };
 
-        var resultFromServer =JsonSerializer.Serialize(jsonResponse);
+        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
         byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
         
         return message;
@@ -45,7 +45,7 @@ public static class Commands
                       "stop - stops server and client running.\n"
         };
 
-        var resultFromServer =JsonSerializer.Serialize(jsonResponse);
+        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
         byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
                
 
@@ -59,7 +59,7 @@ public static class Commands
             Message = "Shutting down..."
         };
 
-        var resultFromServer =JsonSerializer.Serialize(jsonResponse);
+        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
         byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
         
         return message;
@@ -72,7 +72,7 @@ public static class Commands
             Message = "Wrong command\n"
         };
         
-        var resultFromServer =JsonSerializer.Serialize(jsonResponse);
+        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
         byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
        
         return message;
