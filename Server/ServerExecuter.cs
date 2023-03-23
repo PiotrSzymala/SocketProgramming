@@ -1,13 +1,16 @@
 using System.Net.Sockets;
 using System.Text;
+using Newtonsoft.Json;
 using Shared;
 using Shared.Models;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Server;
 
 public static class ServerExecuter
 {
     public static readonly DateTime ServerCreationTime = DateTime.Now;
+    public static List<User> Users = new List<User>();
     public static void ExecuteServer()
     {
         using Socket listener = new Socket(Config.IpAddr.AddressFamily,
@@ -40,7 +43,7 @@ public static class ServerExecuter
                 dataFromClient += Encoding.ASCII.GetString(receivedBytes,
                     0, bytesToEncode);
 
-                var deserializedClientRequest = JsonDeserializer.Deserialize(dataFromClient);
+                var deserializedClientRequest = JsonConvert.DeserializeObject<MyMessage>(dataFromClient);
 
                 ChooseOption(deserializedClientRequest, clientSocket, ref flag);
             }
@@ -87,6 +90,33 @@ public static class ServerExecuter
                 toSend = Commands.WrongCommand();
                 clientSocket.Send(toSend);
                 break;
+        }
+    }
+
+    public static void CreateUser()
+    {
+        Console.WriteLine("Set username:");
+        var username = Console.ReadLine();
+
+        Console.WriteLine("Set password");
+        var password = Console.ReadLine();
+
+        Console.WriteLine("Confirm password:");
+        var confirmedPassword = Console.ReadLine();
+        
+        Console.WriteLine("If you want admin account type in a special password");
+        var specialPassword = Console.ReadLine();
+        
+        var privileges = (specialPassword == "root123" ? Privileges.Admin : Privileges.User);
+
+        if (password == confirmedPassword)
+        {
+            var user = new User(username, password, privileges);
+            Users.Add(user);
+        }
+        else
+        {
+            Console.WriteLine("Passwords are not matching");
         }
     }
 }
