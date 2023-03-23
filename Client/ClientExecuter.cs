@@ -1,6 +1,7 @@
 using System.Net.Sockets;
 using System.Text;
 using Shared;
+using Shared.Models;
 
 namespace Client;
 

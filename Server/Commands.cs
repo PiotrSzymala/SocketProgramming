@@ -1,5 +1,6 @@
 using System.Text;
 using Shared;
+using Shared.Models;
 
 namespace Server;
 
