@@ -1,81 +1,61 @@
+using System.Net.Sockets;
 using System.Text;
 using Newtonsoft.Json;
+using Shared;
 using Shared.Models;
 
 namespace Server;
 
 public static class Commands
 {
-    public static byte[] UptimeCommand()
+    public static Socket ClientSocket { get; set; }
+    public static void UptimeCommand()
     {
         var currentWorkingTime = DateTime.Now;
         var timeSpan = currentWorkingTime - ServerExecuter.ServerCreationTime;
-        
-        MyMessage jsonResponse = new MyMessage
-        {
-            Message = $"Running time: {timeSpan}"
-        };
+        var message = $"Running time: {timeSpan}";
 
-        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
-        byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
-
-        return message;
+        var result = DataSender.SendData(message);
+        ClientSocket.Send(result);
     }
-    public static byte[] InfoCommand()
-    {
-        MyMessage jsonResponse = new MyMessage
-        {
-            Message = $"Sever version number: {ServerInformation.ServerVersion}\n" +
-                      $"Server creation date: {ServerInformation.ServerCreationDate}\n"
-        };
 
-        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
-        byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
-        
-        return message;
-    }
-    public static byte[] HelpCommand()
+    public static void InfoCommand()
     {
-        MyMessage jsonResponse = new MyMessage
-        {
-            Message = "Possible commands: \n" +
+        var message = $"Sever version number: {ServerInformation.ServerVersion}\n" +
+                      $"Server creation date: {ServerInformation.ServerCreationDate}\n";
+        
+        var result = DataSender.SendData(message);
+        ClientSocket.Send(result);
+    }
+
+    public static void HelpCommand()
+    {
+        var message = "Possible commands: \n" +
                       "uptime - returns server lifetime.\n" +
                       "info - returns server's version and creation date.\n" +
                       "help - returns list of possible commands with short description.\n" +
-                      "stop - stops server and client running.\n"
-        };
-
-        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
-        byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
-               
-
-           return message;
+                      "stop - stops server and client running.\n";
+                      
+        var result = DataSender.SendData(message);
+        ClientSocket.Send(result);
     }
 
-    public static byte[] StopCommand()
+    public static void StopCommand()
     {
-        MyMessage jsonResponse = new MyMessage
-        {
-            Message = "Shutting down..."
-        };
-
-        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
-        byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
+        var message = "Shutting down...";
         
-        return message;
+        var result = DataSender.SendData(message);
+        ClientSocket.Send(result);
+        
+        ClientSocket.Shutdown(SocketShutdown.Both);
+        ClientSocket.Close();
     }
 
-    public static byte[] WrongCommand()
+    public static void WrongCommand()
     {
-        MyMessage jsonResponse = new MyMessage
-        {
-            Message = "Wrong command\n"
-        };
-        
-        var resultFromServer =JsonConvert.SerializeObject(jsonResponse);
-        byte[] message = Encoding.ASCII.GetBytes(resultFromServer);
+        var message = "Wrong command\n";
        
-        return message;
+        var result = DataSender.SendData(message);
+        ClientSocket.Send(result);
     }
-    
 }
