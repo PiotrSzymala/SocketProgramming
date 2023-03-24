@@ -26,16 +26,38 @@ public static class ServerExecuter
             using Socket clientSocket = listener.Accept();
 
             Console.WriteLine("Connected");
-
-            var message = Encoding.ASCII.GetBytes("\nEnter command: \n\n");
-
+                
+            var message = DataSender.SendData("\nEnter command:\n");
             clientSocket.Send(message);
 
             bool flag = true;
-
+            bool logged = false;
 
             while (flag)
             {
+                while (!logged)
+                {
+                    var reply = DataReceiver.GetData(clientSocket);
+
+                    switch (reply.ToLower())
+                    {
+                        case "login":
+                            logged = true;
+                            var toSend =  DataSender.SendData("Logged!");
+                            clientSocket.Send(toSend);
+                            break;
+
+                        case "register":
+                            UserCreator.CreateUser(clientSocket);
+                            break;
+                        
+                        default:
+                            var wrong = DataSender.SendData("wrong command");
+                            clientSocket.Send(wrong);
+                            break;
+                    }
+                }
+                
                 var deserializedRequestFromClient = DataReceiver.GetData(clientSocket);
                 ChooseOption(deserializedRequestFromClient, clientSocket, ref flag);
             }
@@ -50,42 +72,29 @@ public static class ServerExecuter
     private static void ChooseOption(string deserializedRequestFromClient, Socket clientSocket, ref bool flag)
     {
         byte[] toSend;
+        Commands.ClientSocket = clientSocket;
         switch (deserializedRequestFromClient.ToLower())
         {
             case "uptime":
-                toSend = Commands.UptimeCommand();
-                clientSocket.Send(toSend);
+                Commands.UptimeCommand();
                 break;
 
             case "info":
-                toSend = Commands.InfoCommand();
-                clientSocket.Send(toSend);
-                break;
+                 Commands.InfoCommand();
+                 break;
 
             case "help":
-                toSend = Commands.HelpCommand();
-                clientSocket.Send(toSend);
-                break;
-            
-            case "login":
-                 UserCreator.CreateUser(clientSocket);
-                break;
+                 Commands.HelpCommand();
+                 break;
 
             case "stop":
-                toSend = Commands.StopCommand();
-                clientSocket.Send(toSend);
-
-                clientSocket.Shutdown(SocketShutdown.Both);
-                clientSocket.Close();
-
+                Commands.StopCommand();
                 flag = false;
-
                 break;
 
             default:
-                toSend = Commands.WrongCommand();
-                clientSocket.Send(toSend);
-                break;
+                 Commands.WrongCommand();
+                 break;
         }
     }
 }
