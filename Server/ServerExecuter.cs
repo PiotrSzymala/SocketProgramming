@@ -3,7 +3,6 @@ using System.Text;
 using Newtonsoft.Json;
 using Shared;
 using Shared.Models;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Server;
 
@@ -11,7 +10,6 @@ public static class ServerExecuter
 {
     public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static List<User> Users = new List<User>();
-    public static MyMessage MessageToClient = new MyMessage();
 
     public static void ExecuteServer()
     {
@@ -79,7 +77,7 @@ public static class ServerExecuter
                 break;
             
             case "login":
-                 CreateUser(clientSocket);
+                 UserCreator.CreateUser(clientSocket);
                 break;
 
             case "stop":
@@ -98,66 +96,5 @@ public static class ServerExecuter
                 clientSocket.Send(toSend);
                 break;
         }
-    }
-
-    private static void CreateUser(Socket clientSocket)
-    {
-         var message = SendToClient("Set username");
-
-        clientSocket.Send(message);
-        
-        var username = GetDataFromClient(clientSocket);
-
-        if (!File.Exists($"{username}.json"))
-        {
-            message = SendToClient("Set password");
-            clientSocket.Send(message);
-            
-            var password = GetDataFromClient(clientSocket);
-
-            message = SendToClient("If you want admin account type in a special password:");
-            clientSocket.Send(message);
-            
-            var specialPassword = GetDataFromClient(clientSocket);
-
-            var privileges = (specialPassword == "root123" ? Privileges.Admin : Privileges.User);
-
-            var user = new User(username, password, privileges);
-            Users.Add(user);
-
-            using (StreamWriter file = File.CreateText($"{username}.json"))
-            {
-                var result = JsonConvert.SerializeObject(user);
-                file.Write(result);
-            }
-            
-            message = SendToClient("User created!");
-            clientSocket.Send(message);
-        }
-        else
-        {
-            message = SendToClient("User already exists!");
-            clientSocket.Send(message);
-        }
-    }
-
-    private static string GetDataFromClient(Socket clientSocket)
-    {
-        var bytesU = new byte[1024];
-        var numByte = clientSocket.Receive(bytesU);
-
-        var received = Encoding.ASCII.GetString(bytesU, 0, numByte);
-        MessageToClient = JsonConvert.DeserializeObject<MyMessage>(received);
-
-        var result = MessageToClient.Message;
-        return result;
-    }
-
-    private static byte[] SendToClient(string messageContext)
-    {
-        MessageToClient.Message = messageContext;
-        var toSend = JsonConvert.SerializeObject(MessageToClient);
-        var message = Encoding.ASCII.GetBytes(toSend);
-        return message;
     }
 }
