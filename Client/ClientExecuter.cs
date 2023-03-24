@@ -20,15 +20,9 @@ public static class ClientExecuter
                 sender.Connect(Config.LocalEndPoint);
 
                 Console.WriteLine($"Socket connected to -> {sender.RemoteEndPoint}");
-
-                byte[] initialCommand = new byte[1024];
-
-                int initComm = sender.Receive(initialCommand);
-
-                string encodingInitComm = Encoding.ASCII.GetString(initialCommand, 0, initComm);
                 
-                Console.WriteLine(encodingInitComm);
-
+                var firstResponseFromServer = DataReceiver.GetData(sender);
+                Console.WriteLine(firstResponseFromServer);
                 
                 string commandToSend;
                 do
