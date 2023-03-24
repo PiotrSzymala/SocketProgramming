@@ -26,35 +26,21 @@ public static class ClientExecuter
                 int initComm = sender.Receive(initialCommand);
 
                 string encodingInitComm = Encoding.ASCII.GetString(initialCommand, 0, initComm);
+                
                 Console.WriteLine(encodingInitComm);
 
-                MyMessage commandToSend = new MyMessage();
-
+                
+                string commandToSend;
                 do
                 {
-                    commandToSend.Message = Console.ReadLine().ToLower();
+                    commandToSend = Console.ReadLine().ToLower();
+                    var message = DataSender.SendData(commandToSend);
+                    sender.Send(message);
 
-                    var serializedCommand = JsonConvert.SerializeObject(commandToSend);
+                    var response = DataReceiver.GetData(sender);
 
-                    byte[] commandInJsonFormat = Encoding.ASCII.GetBytes(serializedCommand);
-
-                    sender.Send(commandInJsonFormat);
-
-                    byte[] messageReceived = new byte[1024];
-
-                    int bytesReceived = sender.Receive(messageReceived);
-
-                    string fromServerResult = Encoding.ASCII.GetString(messageReceived,
-                        0, bytesReceived);
-
-                    var responseFromServer = JsonConvert.DeserializeObject<MyMessage>(fromServerResult);
-
-                    Console.WriteLine($"Response from Server -> {responseFromServer.Message}");
-                    
-                } while (commandToSend.Message != "stop");
-
-                sender.Shutdown(SocketShutdown.Both);
-                sender.Close();
+                    Console.WriteLine($"Response from Server -> {response}");
+                } while (commandToSend != "stop");
             }
 
             catch (ArgumentNullException argumentNullException)
