@@ -36,17 +36,8 @@ public static class ServerExecuter
 
             while (flag)
             {
-                byte[] receivedBytes = new byte[1024];
-                string dataFromClient = string.Empty;
-
-                int bytesToEncode = clientSocket.Receive(receivedBytes);
-
-                dataFromClient += Encoding.ASCII.GetString(receivedBytes,
-                    0, bytesToEncode);
-
-                var deserializedClientRequest = JsonConvert.DeserializeObject<MyMessage>(dataFromClient);
-
-                ChooseOption(deserializedClientRequest, clientSocket, ref flag);
+                var deserializedRequestFromClient = DataReceiver.GetData(clientSocket);
+                ChooseOption(deserializedRequestFromClient, clientSocket, ref flag);
             }
         }
 
@@ -56,10 +47,10 @@ public static class ServerExecuter
         }
     }
 
-    private static void ChooseOption(MyMessage deserializedRequestFromClient, Socket clientSocket, ref bool flag)
+    private static void ChooseOption(string deserializedRequestFromClient, Socket clientSocket, ref bool flag)
     {
         byte[] toSend;
-        switch (deserializedRequestFromClient.Message.ToLower())
+        switch (deserializedRequestFromClient.ToLower())
         {
             case "uptime":
                 toSend = Commands.UptimeCommand();
