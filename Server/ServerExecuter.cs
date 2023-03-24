@@ -11,6 +11,8 @@ public static class ServerExecuter
 {
     public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static List<User> Users = new List<User>();
+    public static MyMessage MessageToClient = new MyMessage();
+
     public static void ExecuteServer()
     {
         using Socket listener = new Socket(Config.IpAddr.AddressFamily,
@@ -28,10 +30,11 @@ public static class ServerExecuter
             Console.WriteLine("Connected");
 
             var message = Encoding.ASCII.GetBytes("\nEnter command: \n\n");
-           
+
             clientSocket.Send(message);
 
             bool flag = true;
+
 
             while (flag)
             {
@@ -74,6 +77,10 @@ public static class ServerExecuter
                 toSend = Commands.HelpCommand();
                 clientSocket.Send(toSend);
                 break;
+            
+            case "login":
+                 CreateUser(clientSocket);
+                break;
 
             case "stop":
                 toSend = Commands.StopCommand();
@@ -93,30 +100,64 @@ public static class ServerExecuter
         }
     }
 
-    public static void CreateUser()
+    private static void CreateUser(Socket clientSocket)
     {
-        Console.WriteLine("Set username:");
-        var username = Console.ReadLine();
+         var message = SendToClient("Set username");
 
-        Console.WriteLine("Set password");
-        var password = Console.ReadLine();
-
-        Console.WriteLine("Confirm password:");
-        var confirmedPassword = Console.ReadLine();
+        clientSocket.Send(message);
         
-        Console.WriteLine("If you want admin account type in a special password");
-        var specialPassword = Console.ReadLine();
-        
-        var privileges = (specialPassword == "root123" ? Privileges.Admin : Privileges.User);
+        var username = GetDataFromClient(clientSocket);
 
-        if (password == confirmedPassword)
+        if (!File.Exists($"{username}.json"))
         {
+            message = SendToClient("Set password");
+            clientSocket.Send(message);
+            
+            var password = GetDataFromClient(clientSocket);
+
+            message = SendToClient("If you want admin account type in a special password:");
+            clientSocket.Send(message);
+            
+            var specialPassword = GetDataFromClient(clientSocket);
+
+            var privileges = (specialPassword == "root123" ? Privileges.Admin : Privileges.User);
+
             var user = new User(username, password, privileges);
             Users.Add(user);
+
+            using (StreamWriter file = File.CreateText($"{username}.json"))
+            {
+                var result = JsonConvert.SerializeObject(user);
+                file.Write(result);
+            }
+            
+            message = SendToClient("User created!");
+            clientSocket.Send(message);
         }
         else
         {
-            Console.WriteLine("Passwords are not matching");
+            message = SendToClient("User already exists!");
+            clientSocket.Send(message);
         }
+    }
+
+    private static string GetDataFromClient(Socket clientSocket)
+    {
+        var bytesU = new byte[1024];
+        var numByte = clientSocket.Receive(bytesU);
+
+        var received = Encoding.ASCII.GetString(bytesU, 0, numByte);
+        MessageToClient = JsonConvert.DeserializeObject<MyMessage>(received);
+
+        var result = MessageToClient.Message;
+        return result;
+    }
+
+    private static byte[] SendToClient(string messageContext)
+    {
+        MessageToClient.Message = messageContext;
+        var toSend = JsonConvert.SerializeObject(MessageToClient);
+        var message = Encoding.ASCII.GetBytes(toSend);
+        return message;
     }
 }
