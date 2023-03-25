@@ -8,7 +8,7 @@ namespace Server;
 
 public static class Commands
 {
-    public static Socket ClientSocket { get; set; }
+    
     public static void UptimeCommand()
     {
         var currentWorkingTime = DateTime.Now;
@@ -16,7 +16,7 @@ public static class Commands
         var message = $"Running time: {timeSpan}";
 
         var result = DataSender.SendData(message);
-        ClientSocket.Send(result);
+        ServerExecuter.ClientSocket.Send(result);
     }
 
     public static void InfoCommand()
@@ -25,7 +25,7 @@ public static class Commands
                       $"Server creation date: {ServerInformation.ServerCreationDate}\n";
         
         var result = DataSender.SendData(message);
-        ClientSocket.Send(result);
+        ServerExecuter.ClientSocket.Send(result);
     }
 
     public static void HelpCommand()
@@ -37,7 +37,7 @@ public static class Commands
                       "stop - stops server and client running.\n";
                       
         var result = DataSender.SendData(message);
-        ClientSocket.Send(result);
+        ServerExecuter.ClientSocket.Send(result);
     }
 
     public static void StopCommand()
@@ -45,10 +45,10 @@ public static class Commands
         var message = "Shutting down...";
         
         var result = DataSender.SendData(message);
-        ClientSocket.Send(result);
+        ServerExecuter.ClientSocket.Send(result);
         
-        ClientSocket.Shutdown(SocketShutdown.Both);
-        ClientSocket.Close();
+        ServerExecuter.ClientSocket.Shutdown(SocketShutdown.Both);
+        ServerExecuter.ClientSocket.Close();
     }
 
     public static void WrongCommand()
@@ -56,6 +56,6 @@ public static class Commands
         var message = "Wrong command\n";
        
         var result = DataSender.SendData(message);
-        ClientSocket.Send(result);
+        ServerExecuter.ClientSocket.Send(result);
     }
 }

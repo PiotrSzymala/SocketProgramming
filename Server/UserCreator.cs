@@ -28,7 +28,9 @@ public static class UserCreator
             
             var specialPassword = DataReceiver.GetData(clientSocket);
             var privileges = (specialPassword == "root123" ? Privileges.Admin : Privileges.User);
+            
             var user = new User(username, password, privileges);
+            ServerExecuter.Users.Add(user);
             
             using (StreamWriter file = File.CreateText($"{username}.json"))
             {

@@ -10,6 +10,7 @@ public static class ServerExecuter
 {
     public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static List<User> Users = new List<User>();
+    public static Socket ClientSocket { get; set; }
 
     public static void ExecuteServer()
     {
@@ -23,12 +24,12 @@ public static class ServerExecuter
 
             Console.WriteLine("Waiting connection ... ");
 
-            using Socket clientSocket = listener.Accept();
+            ClientSocket = listener.Accept();
 
             Console.WriteLine("Connected");
                 
             var message = DataSender.SendData("\nEnter command:\n");
-            clientSocket.Send(message);
+            ClientSocket.Send(message);
 
             bool flag = true;
             bool logged = false;
@@ -37,29 +38,29 @@ public static class ServerExecuter
             {
                 while (!logged)
                 {
-                    var reply = DataReceiver.GetData(clientSocket);
+                    var reply = DataReceiver.GetData(ClientSocket);
 
                     switch (reply.ToLower())
                     {
                         case "login":
                             logged = true;
                             var toSend =  DataSender.SendData("Logged!");
-                            clientSocket.Send(toSend);
+                            ClientSocket.Send(toSend);
                             break;
 
                         case "register":
-                            UserCreator.CreateUser(clientSocket);
+                            UserCreator.CreateUser(ClientSocket);
                             break;
                         
                         default:
                             var wrong = DataSender.SendData("wrong command");
-                            clientSocket.Send(wrong);
+                            ClientSocket.Send(wrong);
                             break;
                     }
                 }
                 
-                var deserializedRequestFromClient = DataReceiver.GetData(clientSocket);
-                ChooseOption(deserializedRequestFromClient, clientSocket, ref flag);
+                var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
+                ChooseOption(deserializedRequestFromClient, ref flag);
             }
         }
 
@@ -69,10 +70,8 @@ public static class ServerExecuter
         }
     }
 
-    private static void ChooseOption(string deserializedRequestFromClient, Socket clientSocket, ref bool flag)
+    private static void ChooseOption(string deserializedRequestFromClient, ref bool flag)
     {
-        byte[] toSend;
-        Commands.ClientSocket = clientSocket;
         switch (deserializedRequestFromClient.ToLower())
         {
             case "uptime":
