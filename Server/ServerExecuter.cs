@@ -16,9 +16,16 @@ public static class ServerExecuter
     {
         using Socket listener = new Socket(Config.IpAddr.AddressFamily,
             SocketType.Stream, ProtocolType.Tcp);
-
         try
         {
+            if (!File.Exists("users.json"))
+            {
+                
+            using (File.Create("users.json")) ;
+            }
+            string usd = File.ReadAllText("users.json");
+            JsonConvert.DeserializeObject<List<User>>(usd);
+            
             listener.Bind(Config.LocalEndPoint);
             listener.Listen(10);
 
@@ -43,9 +50,10 @@ public static class ServerExecuter
                     switch (reply.ToLower())
                     {
                         case "login":
-                            logged = true;
-                            var toSend =  DataSender.SendData("Logged!");
-                            ClientSocket.Send(toSend);
+                            if (LogUserIn())
+                            {
+                                logged = true;
+                            }
                             break;
 
                         case "register":
@@ -87,6 +95,7 @@ public static class ServerExecuter
                  break;
 
             case "stop":
+                SaveList();
                 Commands.StopCommand();
                 flag = false;
                 break;
@@ -94,6 +103,53 @@ public static class ServerExecuter
             default:
                  Commands.WrongCommand();
                  break;
+        }
+    }
+
+    private static bool LogUserIn()
+    {
+        var message = DataSender.SendData("Username:");
+        ClientSocket.Send(message);
+        
+        var username = DataReceiver.GetData(ClientSocket);
+
+
+        var user = Users.FirstOrDefault(x => x.Username.Equals(username));
+        
+        if (Users.Contains(user))
+        {
+            var json = File.ReadAllText($"{username}.json");
+            var deserializedUser = JsonConvert.DeserializeObject<User>(json);
+            
+            message = DataSender.SendData("Passsword:");
+            ClientSocket.Send(message);
+        
+            var password = DataReceiver.GetData(ClientSocket);
+
+            if (password.Equals(deserializedUser.Password))
+            {
+                message = DataSender.SendData("Logged!");
+                ClientSocket.Send(message);
+                return true;
+            }
+
+            message = DataSender.SendData("Wrong password!");
+            ClientSocket.Send(message);
+            return false;
+        }
+
+        message = DataSender.SendData("User does not exist.");
+        ClientSocket.Send(message);
+
+        return false;
+    }
+
+    public static void SaveList()
+    {
+        using (StreamWriter listWriter = File.CreateText("users.json"))
+        {
+            var result = JsonConvert.SerializeObject(Users);
+            listWriter.Write(result);
         }
     }
 }
