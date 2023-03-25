@@ -11,8 +11,7 @@ public static class UserCreator
     public static void CreateUser(Socket clientSocket)
     {
          var message = DataSender.SendData("Set username");
-
-        clientSocket.Send(message);
+         clientSocket.Send(message);
         
         var username = DataReceiver.GetData(clientSocket);
 
@@ -37,6 +36,7 @@ public static class UserCreator
                 var result = JsonConvert.SerializeObject(user);
                 file.Write(result);
             }
+            
             
             message = DataSender.SendData("User created!");
             clientSocket.Send(message);
