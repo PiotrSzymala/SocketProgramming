@@ -17,12 +17,16 @@ public static class ServerExecuter
             SocketType.Stream, ProtocolType.Tcp);
         try
         {
-            if (!File.Exists("users.json"))
+            if (!Directory.Exists("users"))
             {
-                using var sw = new StreamWriter("users.json");
+                Directory.CreateDirectory("users");
+            }
+            if (!File.Exists("users/users.json"))
+            {
+                using var sw = new StreamWriter("users/users.json");
                 sw.Write("[]");
             }
-            string usd = File.ReadAllText("users.json");
+            string usd = File.ReadAllText("users/users.json");
             Users = JsonConvert.DeserializeObject<List<User>>(usd);
 
             listener.Bind(Config.LocalEndPoint);
@@ -107,7 +111,7 @@ public static class ServerExecuter
 
     private static void SaveList()
     {
-        using StreamWriter listWriter = File.CreateText("users.json");
+        using StreamWriter listWriter = File.CreateText("users/users.json");
         var result = JsonConvert.SerializeObject(Users);
         listWriter.Write(result);
     }

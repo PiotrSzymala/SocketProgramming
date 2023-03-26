@@ -18,7 +18,7 @@ public static class UserLogger
         
         if (ServerExecuter.Users.Contains(user))
         {
-            var json = File.ReadAllText($"{username}.json");
+            var json = File.ReadAllText($"users/{username}.json");
             var deserializedUser = JsonConvert.DeserializeObject<User>(json);
             
             message = DataSender.SendData("Passsword:");

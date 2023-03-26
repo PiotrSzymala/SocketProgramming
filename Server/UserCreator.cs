@@ -15,7 +15,7 @@ public static class UserCreator
         
         var username = DataReceiver.GetData(clientSocket);
 
-        if (!File.Exists($"{username}.json"))
+        if (!File.Exists($"users/{username}.json"))
         {
             message = DataSender.SendData("Set password");
             clientSocket.Send(message);
@@ -31,7 +31,7 @@ public static class UserCreator
             var user = new User(username, password, privileges);
             ServerExecuter.Users.Add(user);
             
-            using (StreamWriter file = File.CreateText($"{username}.json"))
+            using (StreamWriter file = File.CreateText($"users/{username}.json"))
             {
                 var result = JsonConvert.SerializeObject(user);
                 file.Write(result);
