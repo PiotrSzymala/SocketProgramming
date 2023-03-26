@@ -20,12 +20,12 @@ public static class ServerExecuter
         {
             if (!File.Exists("users.json"))
             {
-                
-            using (File.Create("users.json")) ;
+                using var sw = new StreamWriter("users.json");
+                sw.Write("[]");
             }
             string usd = File.ReadAllText("users.json");
-            JsonConvert.DeserializeObject<List<User>>(usd);
-            
+            Users = JsonConvert.DeserializeObject<List<User>>(usd);
+
             listener.Bind(Config.LocalEndPoint);
             listener.Listen(10);
 
