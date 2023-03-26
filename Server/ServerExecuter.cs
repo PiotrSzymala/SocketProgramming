@@ -1,5 +1,4 @@
 using System.Net.Sockets;
-using System.Text;
 using Newtonsoft.Json;
 using Shared;
 using Shared.Models;
@@ -50,7 +49,7 @@ public static class ServerExecuter
                     switch (reply.ToLower())
                     {
                         case "login":
-                            if (LogUserIn())
+                            if (UserLogger.LogUserIn())
                             {
                                 logged = true;
                             }
@@ -106,50 +105,10 @@ public static class ServerExecuter
         }
     }
 
-    private static bool LogUserIn()
+    private static void SaveList()
     {
-        var message = DataSender.SendData("Username:");
-        ClientSocket.Send(message);
-        
-        var username = DataReceiver.GetData(ClientSocket);
-
-
-        var user = Users.FirstOrDefault(x => x.Username.Equals(username));
-        
-        if (Users.Contains(user))
-        {
-            var json = File.ReadAllText($"{username}.json");
-            var deserializedUser = JsonConvert.DeserializeObject<User>(json);
-            
-            message = DataSender.SendData("Passsword:");
-            ClientSocket.Send(message);
-        
-            var password = DataReceiver.GetData(ClientSocket);
-
-            if (password.Equals(deserializedUser.Password))
-            {
-                message = DataSender.SendData("Logged!");
-                ClientSocket.Send(message);
-                return true;
-            }
-
-            message = DataSender.SendData("Wrong password!");
-            ClientSocket.Send(message);
-            return false;
-        }
-
-        message = DataSender.SendData("User does not exist.");
-        ClientSocket.Send(message);
-
-        return false;
-    }
-
-    public static void SaveList()
-    {
-        using (StreamWriter listWriter = File.CreateText("users.json"))
-        {
-            var result = JsonConvert.SerializeObject(Users);
-            listWriter.Write(result);
-        }
+        using StreamWriter listWriter = File.CreateText("users.json");
+        var result = JsonConvert.SerializeObject(Users);
+        listWriter.Write(result);
     }
 }
