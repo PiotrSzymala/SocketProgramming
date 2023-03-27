@@ -10,7 +10,7 @@ public static class ServerExecuter
     public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static List<User> Users = new List<User>();
 
-    public delegate void ChooseFunction(ref bool flag, ref bool logged); 
+    private delegate void ChooseFunction(ref bool flag, ref bool logged); 
     public static Socket ClientSocket { get; set; }
 
     public static void ExecuteServer()
@@ -130,47 +130,14 @@ public static class ServerExecuter
                  break;
         }
     }
-
-    private static void BasicCommandsMenu(ref bool flag, ref bool logged)
-    {
-        var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
-        switch (deserializedRequestFromClient.ToLower())
-        {
-            case "uptime":
-                Commands.UptimeCommand();
-                break;
-
-            case "info":
-                Commands.InfoCommand();
-                break;
-
-            case "help":
-                Commands.HelpCommand();
-                break;
-
-            case "stop":
-                SaveList();
-                Commands.StopCommand();
-                flag = false;
-                break;
-            
-            case "logout":
-                ClientSocket.Send(DataSender.SendData("Logged out!"));
-                logged = false;
-                break;
-
-            default:
-                Commands.WrongCommand();
-                break;
-        }
-    }
+    
     private static void MenuForAdmin(ref bool flag, ref bool logged)
     {
         var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
         switch (deserializedRequestFromClient.ToLower())
         {
             case "delete":
-                RemoveUser();
+                UserRemover.RemoveUser();
                 break;
             case "uptime":
                 Commands.UptimeCommand();
@@ -201,35 +168,10 @@ public static class ServerExecuter
         }
     }
     
-
     private static void SaveList()
     {
         using StreamWriter listWriter = File.CreateText("users/users.json");
         var result = JsonConvert.SerializeObject(Users);
         listWriter.Write(result);
-    }
-
-    private static void RemoveUser()
-    {
-        var message = DataSender.SendData("Which user you want to delete?");
-        ClientSocket.Send(message);
-
-        var nickname = DataReceiver.GetData(ClientSocket);
-
-        var userToDelete = Users.FirstOrDefault(u => u.Username.Equals(nickname));
-
-        if (Users.Contains(userToDelete))
-        {
-            File.Delete($"users/{userToDelete.Username}.json");
-            Users.Remove(userToDelete);
-            
-            message = DataSender.SendData("User has been deleted.");
-            ClientSocket.Send(message);
-        }
-        else
-        {
-            message = DataSender.SendData("User does not exist.");
-            ClientSocket.Send(message);
-        }
     }
 }
