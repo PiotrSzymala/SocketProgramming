@@ -1,6 +1,8 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
+using Server.Controllers;
 using Shared;
+using Shared.Controllers;
 using Shared.Models;
 
 namespace Server;
@@ -31,6 +33,7 @@ public static class ServerExecuter
             
             CrateDirectoryForUsers();
             CreateFileForUsers();
+            
             string usersListString = File.ReadAllText("users/users.json");
             Users = JsonConvert.DeserializeObject<List<User>>(usersListString);
                 

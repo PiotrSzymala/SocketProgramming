@@ -1,6 +1,7 @@
 using Shared;
+using Shared.Controllers;
 
-namespace Server;
+namespace Server.Controllers;
 
 public static class UserRemover
 {

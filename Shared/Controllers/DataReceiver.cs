@@ -3,10 +3,9 @@ using System.Text;
 using Newtonsoft.Json;
 using Shared.Models;
 
-namespace Shared;
+namespace Shared.Controllers;
 
-
-    public static class DataReceiver
+public static class DataReceiver
     {
         public static string GetData(Socket socket)
         {

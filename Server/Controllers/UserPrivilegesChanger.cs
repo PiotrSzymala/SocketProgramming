@@ -1,8 +1,9 @@
 using Newtonsoft.Json;
 using Shared;
+using Shared.Controllers;
 using Shared.Models;
 
-namespace Server;
+namespace Server.Controllers;
 
 public static class UserPrivilegesChanger
 {
