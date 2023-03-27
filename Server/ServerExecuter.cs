@@ -137,7 +137,7 @@ public static class ServerExecuter
         switch (deserializedRequestFromClient.ToLower())
         {
             case "change":
-                ChangePrivileges();
+                UserPrivilegesChanger.ChangePrivileges();
                 break;
             
             case "delete":
@@ -179,34 +179,4 @@ public static class ServerExecuter
         var result = JsonConvert.SerializeObject(Users);
         listWriter.Write(result);
     }
-
-    private static void ChangePrivileges()
-    {
-        var message = DataSender.SendData("Which user's privileges you want to change?");
-        ClientSocket.Send(message);
-        
-        var nickname = DataReceiver.GetData(ClientSocket);
-
-        var userToChangePrivileges = Users.FirstOrDefault(u => u.Username.Equals(nickname));
-
-        if (Users.Contains(userToChangePrivileges))
-        {
-            userToChangePrivileges.Privileges = userToChangePrivileges.Privileges == Privileges.Admin ? Privileges.User : Privileges.Admin;
-            
-            using (StreamWriter file = File.CreateText($"users/{userToChangePrivileges.Username}.json"))
-            {
-                var result = JsonConvert.SerializeObject(userToChangePrivileges);
-                file.Write(result);
-            }
-            
-            message = DataSender.SendData($"Privileges for {userToChangePrivileges.Username} changed.");
-            ClientSocket.Send(message);
-        }
-        else
-        {
-            message = DataSender.SendData("User does not exist.");
-            ClientSocket.Send(message);
-        }
-    }
-    
 }
