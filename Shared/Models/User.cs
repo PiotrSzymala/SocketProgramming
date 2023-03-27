@@ -19,4 +19,8 @@ public class User
         Password = password;
         Privileges = privileges;
     }
+
+    public User()
+    {
+    }
 }
