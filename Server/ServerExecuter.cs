@@ -9,6 +9,8 @@ public static class ServerExecuter
 {
     public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static List<User> Users = new List<User>();
+
+    public delegate void ChooseFunction(ref bool flag); 
     public static Socket ClientSocket { get; set; }
 
     public static void ExecuteServer()
@@ -17,17 +19,6 @@ public static class ServerExecuter
             SocketType.Stream, ProtocolType.Tcp);
         try
         {
-            if (!Directory.Exists("users"))
-            {
-                Directory.CreateDirectory("users");
-            }
-            if (!File.Exists("users/users.json"))
-            {
-                using var sw = new StreamWriter("users/users.json");
-                sw.Write("[]");
-            }
-            string usd = File.ReadAllText("users/users.json");
-            Users = JsonConvert.DeserializeObject<List<User>>(usd);
 
             listener.Bind(Config.LocalEndPoint);
             listener.Listen(10);
@@ -37,12 +28,19 @@ public static class ServerExecuter
             ClientSocket = listener.Accept();
 
             Console.WriteLine("Connected");
+            
+            CrateDirectoryForUsers();
+            CreateFileForUsers();
+            string usersListString = File.ReadAllText("users/users.json");
+            Users = JsonConvert.DeserializeObject<List<User>>(usersListString);
                 
             var message = DataSender.SendData("\nEnter command:\n");
             ClientSocket.Send(message);
 
             bool flag = true;
             bool logged = false;
+
+            User log = new User();
 
             while (flag)
             {
@@ -53,7 +51,7 @@ public static class ServerExecuter
                     switch (reply.ToLower())
                     {
                         case "login":
-                            if (UserLogger.LogUserIn())
+                            if (UserLogger.LogUserIn(out log))
                             {
                                 logged = true;
                             }
@@ -69,9 +67,8 @@ public static class ServerExecuter
                             break;
                     }
                 }
-                
-                var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
-                ChooseOption(deserializedRequestFromClient, ref flag);
+
+                MenuForUser(ref flag);
             }
         }
 
@@ -81,8 +78,26 @@ public static class ServerExecuter
         }
     }
 
-    private static void ChooseOption(string deserializedRequestFromClient, ref bool flag)
+    private static void CreateFileForUsers()
     {
+        if (!File.Exists("users/users.json"))
+        {
+            using var sw = new StreamWriter("users/users.json");
+            sw.Write("[]");
+        }
+    }
+
+    private static void CrateDirectoryForUsers()
+    {
+        if (!Directory.Exists("users"))
+        {
+            Directory.CreateDirectory("users");
+        }
+    }
+
+    private static void MenuForUser( ref bool flag)
+    {
+        var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
         switch (deserializedRequestFromClient.ToLower())
         {
             case "uptime":
