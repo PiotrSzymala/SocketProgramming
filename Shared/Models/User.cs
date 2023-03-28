@@ -13,11 +13,15 @@ public class User
     [JsonProperty("privileges")]
     public Privileges Privileges { get; set; } = Privileges.User;
 
-    public User(string username, string password, Privileges privileges)
+    [JsonProperty("inbox")]
+    public List<MessageToUser> Inbox { get; set; } = new List<MessageToUser>();
+
+    public User(string username, string password, Privileges privileges, List<MessageToUser> inbox)
     {
         Username = username;
         Password = password;
         Privileges = privileges;
+        Inbox = inbox;
     }
 
     public User()
