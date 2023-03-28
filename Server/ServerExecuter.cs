@@ -12,7 +12,8 @@ public static class ServerExecuter
     public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static List<User> Users = new List<User>();
 
-    private delegate void ChooseFunction(ref bool flag, ref bool logged); 
+    private delegate void ChooseFunction(User currentlyLoggedUser, ref bool flag, ref bool logged);
+
     public static Socket ClientSocket { get; set; }
 
     public static void ExecuteServer()
@@ -21,7 +22,6 @@ public static class ServerExecuter
             SocketType.Stream, ProtocolType.Tcp);
         try
         {
-
             listener.Bind(Config.LocalEndPoint);
             listener.Listen(10);
 
@@ -30,20 +30,20 @@ public static class ServerExecuter
             ClientSocket = listener.Accept();
 
             Console.WriteLine("Connected");
-            
+
             CrateDirectoryForUsers();
             CreateFileForUsers();
-            
+
             string usersListString = File.ReadAllText("users/users.json");
             Users = JsonConvert.DeserializeObject<List<User>>(usersListString);
-                
+
             var message = DataSender.SendData("\nLogin or register:\n");
             ClientSocket.Send(message);
 
             bool flag = true;
             bool logged = false;
 
-            User log = new User();
+            User curentlyLoggedUser = new User();
 
             while (flag)
             {
@@ -54,32 +54,34 @@ public static class ServerExecuter
                     switch (reply.ToLower())
                     {
                         case "login":
-                            if (UserLogger.LogUserIn(out log))
+                            if (UserLogger.LogUserIn(out curentlyLoggedUser))
                             {
                                 logged = true;
                             }
+
                             break;
 
                         case "register":
                             UserCreator.CreateUser(ClientSocket);
                             break;
-                        
+
                         default:
                             var wrong = DataSender.SendData("wrong command");
                             ClientSocket.Send(wrong);
                             break;
                     }
                 }
-                
-                ChooseFunction myDel = log.Privileges == Privileges.Admin ? MenuForAdmin : MenuForUser;
-                
-                myDel.Invoke(ref flag,ref logged);
+
+                ChooseFunction myDel = curentlyLoggedUser.Privileges == Privileges.Admin ? MenuForAdmin : MenuForUser;
+
+                myDel.Invoke(curentlyLoggedUser, ref flag, ref logged);
             }
         }
 
         catch (Exception exception)
         {
             Console.WriteLine($"Exception: {exception}");
+            SaveList();
         }
     }
 
@@ -100,51 +102,17 @@ public static class ServerExecuter
         }
     }
 
-    private static void MenuForUser( ref bool flag, ref bool logged)
+    private static void MenuForUser(User currentlyLoggedUser, ref bool flag, ref bool logged)
     {
         var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
         switch (deserializedRequestFromClient.ToLower())
         {
-            case "uptime":
-                Commands.UptimeCommand();
-                break;
-
-            case "info":
-                 Commands.InfoCommand();
-                 break;
-
-            case "help":
-                 Commands.HelpCommand();
-                 break;
-
-            case "stop":
-                SaveList();
-                Commands.StopCommand();
-                flag = false;
+            case "send":
+                SendMessage(currentlyLoggedUser);
                 break;
             
-            case "logout":
-                ClientSocket.Send(DataSender.SendData("Logged out!"));
-                logged = false;
-                break;
-
-            default:
-                 Commands.WrongCommand();
-                 break;
-        }
-    }
-    
-    private static void MenuForAdmin(ref bool flag, ref bool logged)
-    {
-        var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
-        switch (deserializedRequestFromClient.ToLower())
-        {
-            case "change":
-                UserPrivilegesChanger.ChangePrivileges();
-                break;
-            
-            case "delete":
-                UserRemover.RemoveUser();
+            case "inbox":
+                CheckInbox(currentlyLoggedUser);
                 break;
             
             case "uptime":
@@ -164,7 +132,7 @@ public static class ServerExecuter
                 Commands.StopCommand();
                 flag = false;
                 break;
-            
+
             case "logout":
                 ClientSocket.Send(DataSender.SendData("Logged out!"));
                 logged = false;
@@ -175,11 +143,132 @@ public static class ServerExecuter
                 break;
         }
     }
-    
+
+    private static void MenuForAdmin(User currentlyLoggedUser, ref bool flag, ref bool logged)
+    {
+        var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
+        switch (deserializedRequestFromClient.ToLower())
+        {
+            case "send":
+                SendMessage(currentlyLoggedUser);
+                break;
+            
+            case "inbox":
+                CheckInbox(currentlyLoggedUser);
+                break;
+            
+            case "change":
+                UserPrivilegesChanger.ChangePrivileges();
+                break;
+
+            case "delete":
+                UserRemover.RemoveUser();
+                break;
+
+            case "uptime":
+                Commands.UptimeCommand();
+                break;
+
+            case "info":
+                Commands.InfoCommand();
+                break;
+
+            case "help":
+                Commands.HelpCommand();
+                break;
+
+            case "stop":
+                SaveList();
+                Commands.StopCommand();
+                flag = false;
+                break;
+
+            case "logout":
+                ClientSocket.Send(DataSender.SendData("Logged out!"));
+                logged = false;
+                break;
+
+            default:
+                Commands.WrongCommand();
+                break;
+        }
+    }
+
     private static void SaveList()
     {
         using StreamWriter listWriter = File.CreateText("users/users.json");
         var result = JsonConvert.SerializeObject(Users);
         listWriter.Write(result);
+    }
+
+    private static void SendMessage(User sender)
+    {
+        var message = DataSender.SendData("To whom do you want to send the message?");
+        ClientSocket.Send(message);
+
+        var username = DataReceiver.GetData(ClientSocket);
+
+        var userToSendMessage = Users.FirstOrDefault(u => u.Username.Equals(username));
+
+        if (Users.Contains(userToSendMessage))
+        {
+            if (userToSendMessage.Inbox.Count < 5)
+            {
+                message = DataSender.SendData("Write your message:");
+                ClientSocket.Send(message);
+
+                var messageContent = DataReceiver.GetData(ClientSocket);
+
+                userToSendMessage.Inbox.Add(new MessageToUser()
+                {
+                    MessageAuthor = sender.Username,
+                    MessageContent = messageContent
+                });
+                
+                using (StreamWriter file = File.CreateText($"users/{userToSendMessage.Username}.json"))
+                {
+                    var result = JsonConvert.SerializeObject(userToSendMessage);
+                    file.Write(result);
+                }
+
+                message = DataSender.SendData("The message has been sent.");
+                ClientSocket.Send(message);
+            }
+            else
+            {
+                message = DataSender.SendData($"The inbox of {userToSendMessage.Username} is full.");
+                ClientSocket.Send(message);
+            }
+        }
+        else
+        {
+            message = DataSender.SendData("User does not exist.");
+            ClientSocket.Send(message);
+        }
+    }
+
+    private static void CheckInbox(User currentlyLoggedUser)
+    {
+        if (currentlyLoggedUser.Inbox.Count == 0)
+        {
+            var message = DataSender.SendData("Inbox is empty");
+            ClientSocket.Send(message);
+        }
+        MessagesDisplayer(currentlyLoggedUser.Inbox);
+    }
+
+    private static void MessagesDisplayer(List<MessageToUser> messages)
+    {
+        int counter = 1;
+
+        string test = string.Empty;
+        foreach (var message in messages)
+        {
+            test += $"\n\nMessage {counter}/{messages.Count}, From: {message.MessageAuthor}" +
+                    $"\nContent: {message.MessageContent}\n";
+            counter++;
+        }
+        var messageInfo = DataSender.SendData(test);
+        ClientSocket.Send(messageInfo);
     }
 }
