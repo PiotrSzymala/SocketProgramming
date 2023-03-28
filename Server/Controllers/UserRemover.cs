@@ -10,9 +10,9 @@ public static class UserRemover
         var message = DataSender.SendData("Which user you want to delete?");
         ServerExecuter.ClientSocket.Send(message);
 
-        var nickname = DataReceiver.GetData(ServerExecuter.ClientSocket);
+        var username = DataReceiver.GetData(ServerExecuter.ClientSocket);
 
-        var userToDelete = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(nickname));
+        var userToDelete = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
 
         if (ServerExecuter.Users.Contains(userToDelete))
         {

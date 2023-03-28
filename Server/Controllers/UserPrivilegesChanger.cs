@@ -12,9 +12,9 @@ public static class UserPrivilegesChanger
         var message = DataSender.SendData("Which user's privileges you want to change?");
         ServerExecuter.ClientSocket.Send(message);
         
-        var nickname = DataReceiver.GetData(ServerExecuter.ClientSocket);
+        var username = DataReceiver.GetData(ServerExecuter.ClientSocket);
 
-        var userToChangePrivileges = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(nickname));
+        var userToChangePrivileges = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
 
         if (ServerExecuter.Users.Contains(userToChangePrivileges))
         {
