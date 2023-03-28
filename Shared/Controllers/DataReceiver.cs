@@ -13,9 +13,9 @@ public static class DataReceiver
             var numByte = socket.Receive(bytesToReceive);
 
             var receivedString = Encoding.ASCII.GetString(bytesToReceive, 0, numByte);
-            var MessageToClient = JsonConvert.DeserializeObject<MyMessage>(receivedString);
+            var clientServerResponse = JsonConvert.DeserializeObject<CommandFromUser>(receivedString);
 
-            var result = MessageToClient.Message;
-            return result;
+            var dataToSend = clientServerResponse.Command;
+            return dataToSend;
         }
     }
