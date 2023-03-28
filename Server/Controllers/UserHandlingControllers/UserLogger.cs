@@ -28,7 +28,7 @@ public static class UserLogger
 
             if (password.Equals(deserializedUser.Password))
             {
-                message = DataSender.SendData("Logged!");
+                message = DataSender.SendData("Logged! Type 'help' to get list of commands:");
                 ServerExecuter.ClientSocket.Send(message);
                 loggedUser = user;
                 return true;
