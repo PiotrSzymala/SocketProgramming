@@ -36,8 +36,10 @@ public static class UserCreator
                 file.Write(result);
             }
             ListSaver.SaveList();
-            
-            message = DataSender.SendData("User created!");
+
+            var typeOfUser = user.Privileges == Privileges.Admin ? "Admin created" : "User created";
+                
+            message = DataSender.SendData(typeOfUser);
             clientSocket.Send(message);
         }
         else
