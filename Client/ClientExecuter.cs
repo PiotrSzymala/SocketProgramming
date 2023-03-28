@@ -21,18 +21,19 @@ public static class ClientExecuter
                 
                 var firstResponseFromServer = DataReceiver.GetData(sender);
                 Console.WriteLine(firstResponseFromServer);
+
+                string response;
                 
-                string commandToSend;
                 do
                 {
-                    commandToSend = Console.ReadLine().ToLower();
+                    var commandToSend = Console.ReadLine().ToLower();
                     var message = DataSender.SendData(commandToSend);
                     sender.Send(message);
 
-                    var response = DataReceiver.GetData(sender);
+                     response = DataReceiver.GetData(sender);
 
                     Console.WriteLine($"Response from Server -> {response}");
-                } while (commandToSend != "stop");
+                } while (response != "Shutting down...");
             }
 
             catch (ArgumentNullException argumentNullException)
