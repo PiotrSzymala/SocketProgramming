@@ -27,7 +27,7 @@ public static class Commands
 
     public static void HelpCommand()
     {
-        var message = "Possible commands: \n" +
+        var message = "\nPossible commands: \n" +
                       "send - send message to other user.\n" +
                       "inbox - check your inbox.\n" +
                       "clear - clear your inbox\n" +
@@ -43,7 +43,7 @@ public static class Commands
 
     public static void HelpCommandForAdmin()
     {
-        var message = "Possible commands: \n" +
+        var message = "\nPossible commands: \n" +
                       "change - change user's privileges\n" +
                       "delete - delete user\n"+
                       "send - send message to other user.\n" +
