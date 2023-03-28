@@ -1,6 +1,8 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
 using Server.Controllers;
+using Server.Controllers.MessageHandlingControllers;
+using Server.Controllers.UserHandlingControllers;
 using Shared;
 using Shared.Controllers;
 using Shared.Models;
@@ -81,7 +83,7 @@ public static class ServerExecuter
         catch (Exception exception)
         {
             Console.WriteLine($"Exception: {exception}");
-            SaveList();
+            ListSaver.SaveList();
         }
     }
 
@@ -108,15 +110,15 @@ public static class ServerExecuter
         switch (deserializedRequestFromClient.ToLower())
         {
             case "send":
-                SendMessage(currentlyLoggedUser);
+                MessageSender.SendMessage(currentlyLoggedUser);
                 break;
             
             case "inbox":
-                CheckInbox(currentlyLoggedUser);
+                MessageChecker.CheckInbox(currentlyLoggedUser);
                 break;
             
             case "clear":
-                ClearInbox(currentlyLoggedUser);
+                MessageBoxCleaner.ClearInbox(currentlyLoggedUser);
                 break;
             
             case "uptime":
@@ -137,7 +139,7 @@ public static class ServerExecuter
                 break;
             
             case "stop":
-                SaveList();
+                ListSaver.SaveList();
                 Commands.StopCommand();
                 flag = false;
                 break;
@@ -154,15 +156,15 @@ public static class ServerExecuter
         switch (deserializedRequestFromClient.ToLower())
         {
             case "send":
-                SendMessage(currentlyLoggedUser);
+                MessageSender.SendMessage(currentlyLoggedUser);
                 break;
             
             case "inbox":
-                CheckInbox(currentlyLoggedUser);
+                MessageChecker.CheckInbox(currentlyLoggedUser);
                 break;
             
             case "clear":
-                ClearInbox(currentlyLoggedUser);
+                MessageBoxCleaner.ClearInbox(currentlyLoggedUser);
                 break;
             
             case "change":
@@ -191,7 +193,7 @@ public static class ServerExecuter
                 break;
             
             case "stop":
-                SaveList();
+                ListSaver.SaveList();
                 Commands.StopCommand();
                 flag = false;
                 break;
@@ -199,111 +201,6 @@ public static class ServerExecuter
             default:
                 Commands.WrongCommand();
                 break;
-        }
-    }
-
-    private static void SaveList()
-    {
-        using StreamWriter listWriter = File.CreateText("users/users.json");
-        var result = JsonConvert.SerializeObject(Users);
-        listWriter.Write(result);
-    }
-
-    private static void SendMessage(User sender)
-    {
-        var message = DataSender.SendData("To whom do you want to send the message?");
-        ClientSocket.Send(message);
-
-        var username = DataReceiver.GetData(ClientSocket);
-
-        var userToSendMessage = Users.FirstOrDefault(u => u.Username.Equals(username));
-
-        if (Users.Contains(userToSendMessage))
-        {
-            if (userToSendMessage.Inbox.Count < 5)
-            {
-                message = DataSender.SendData("Write your message:");
-                ClientSocket.Send(message);
-
-                var messageContent = DataReceiver.GetData(ClientSocket);
-
-                userToSendMessage.Inbox.Add(new MessageToUser()
-                {
-                    MessageAuthor = sender.Username,
-                    MessageContent = messageContent
-                });
-                
-                using (StreamWriter file = File.CreateText($"users/{userToSendMessage.Username}.json"))
-                {
-                    var result = JsonConvert.SerializeObject(userToSendMessage);
-                    file.Write(result);
-                }
-
-                message = DataSender.SendData("The message has been sent.");
-                ClientSocket.Send(message);
-            }
-            else
-            {
-                message = DataSender.SendData($"The inbox of {userToSendMessage.Username} is full.");
-                ClientSocket.Send(message);
-            }
-        }
-        else
-        {
-            message = DataSender.SendData("User does not exist.");
-            ClientSocket.Send(message);
-        }
-    }
-
-    private static void CheckInbox(User currentlyLoggedUser)
-    {
-        if (currentlyLoggedUser.Inbox.Count == 0)
-        {
-            var message = DataSender.SendData("Inbox is empty");
-            ClientSocket.Send(message);
-        }
-        MessagesDisplayer(currentlyLoggedUser.Inbox);
-    }
-
-    private static void MessagesDisplayer(List<MessageToUser> messages)
-    {
-        int counter = 1;
-
-        string test = string.Empty;
-        foreach (var message in messages)
-        {
-            test += $"\n\nMessage {counter}/{messages.Count}, From: {message.MessageAuthor}" +
-                    $"\nContent: {message.MessageContent}\n";
-            counter++;
-        }
-        var messageInfo = DataSender.SendData(test);
-        ClientSocket.Send(messageInfo);
-    }
-
-    private static void ClearInbox(User currentlyLoggedUser)
-    {
-        var message = DataSender.SendData("All messages will be deleted. Are you sure? (y/n)");
-        ClientSocket.Send(message);
-
-        var decision = DataReceiver.GetData(ClientSocket);
-
-        if (decision.ToLower() == "y")
-        {
-            currentlyLoggedUser.Inbox.Clear();
-            
-            using (StreamWriter file = File.CreateText($"users/{currentlyLoggedUser.Username}.json"))
-            {
-                var result = JsonConvert.SerializeObject(currentlyLoggedUser);
-                file.Write(result);
-            }
-            SaveList();
-            message = DataSender.SendData("All messages deleted.");
-            ClientSocket.Send(message);
-        }
-        else
-        {
-            message = DataSender.SendData("Deleting canceled.");
-            ClientSocket.Send(message);
         }
     }
 }
