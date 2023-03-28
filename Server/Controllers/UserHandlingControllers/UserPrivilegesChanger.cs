@@ -1,9 +1,8 @@
 using Newtonsoft.Json;
-using Shared;
 using Shared.Controllers;
 using Shared.Models;
 
-namespace Server.Controllers;
+namespace Server.Controllers.UserHandlingControllers;
 
 public static class UserPrivilegesChanger
 {
@@ -25,6 +24,7 @@ public static class UserPrivilegesChanger
                 var result = JsonConvert.SerializeObject(userToChangePrivileges);
                 file.Write(result);
             }
+            ListSaver.SaveList();
             
             message = DataSender.SendData($"Privileges for {userToChangePrivileges.Username} changed.");
             ServerExecuter.ClientSocket.Send(message);

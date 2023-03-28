@@ -1,7 +1,6 @@
-using Shared;
 using Shared.Controllers;
 
-namespace Server.Controllers;
+namespace Server.Controllers.UserHandlingControllers;
 
 public static class UserRemover
 {
@@ -18,6 +17,8 @@ public static class UserRemover
         {
             File.Delete($"users/{userToDelete.Username}.json");
             ServerExecuter.Users.Remove(userToDelete);
+            
+            ListSaver.SaveList();
             
             message = DataSender.SendData("User has been deleted.");
             ServerExecuter.ClientSocket.Send(message);

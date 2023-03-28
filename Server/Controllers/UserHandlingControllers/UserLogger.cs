@@ -1,9 +1,8 @@
 using Newtonsoft.Json;
-using Shared;
 using Shared.Controllers;
 using Shared.Models;
 
-namespace Server.Controllers;
+namespace Server.Controllers.UserHandlingControllers;
 
 public static class UserLogger
 {

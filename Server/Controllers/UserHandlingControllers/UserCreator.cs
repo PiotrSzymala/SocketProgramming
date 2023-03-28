@@ -1,10 +1,9 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
-using Shared;
 using Shared.Controllers;
 using Shared.Models;
 
-namespace Server.Controllers;
+namespace Server.Controllers.UserHandlingControllers;
 
 public static class UserCreator
 {
@@ -36,7 +35,7 @@ public static class UserCreator
                 var result = JsonConvert.SerializeObject(user);
                 file.Write(result);
             }
-            
+            ListSaver.SaveList();
             
             message = DataSender.SendData("User created!");
             clientSocket.Send(message);
