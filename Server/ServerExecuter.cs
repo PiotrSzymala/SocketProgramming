@@ -115,6 +115,10 @@ public static class ServerExecuter
                 CheckInbox(currentlyLoggedUser);
                 break;
             
+            case "clear":
+                ClearInbox(currentlyLoggedUser);
+                break;
+            
             case "uptime":
                 Commands.UptimeCommand();
                 break;
@@ -127,17 +131,17 @@ public static class ServerExecuter
                 Commands.HelpCommand();
                 break;
 
+            case "logout":
+                ClientSocket.Send(DataSender.SendData("Logged out!"));
+                logged = false;
+                break;
+            
             case "stop":
                 SaveList();
                 Commands.StopCommand();
                 flag = false;
                 break;
-
-            case "logout":
-                ClientSocket.Send(DataSender.SendData("Logged out!"));
-                logged = false;
-                break;
-
+            
             default:
                 Commands.WrongCommand();
                 break;
@@ -155,6 +159,10 @@ public static class ServerExecuter
             
             case "inbox":
                 CheckInbox(currentlyLoggedUser);
+                break;
+            
+            case "clear":
+                ClearInbox(currentlyLoggedUser);
                 break;
             
             case "change":
@@ -177,15 +185,15 @@ public static class ServerExecuter
                 Commands.HelpCommand();
                 break;
 
+            case "logout":
+                ClientSocket.Send(DataSender.SendData("Logged out!"));
+                logged = false;
+                break;
+            
             case "stop":
                 SaveList();
                 Commands.StopCommand();
                 flag = false;
-                break;
-
-            case "logout":
-                ClientSocket.Send(DataSender.SendData("Logged out!"));
-                logged = false;
                 break;
 
             default:
@@ -270,5 +278,32 @@ public static class ServerExecuter
         }
         var messageInfo = DataSender.SendData(test);
         ClientSocket.Send(messageInfo);
+    }
+
+    private static void ClearInbox(User currentlyLoggedUser)
+    {
+        var message = DataSender.SendData("All messages will be deleted. Are you sure? (y/n)");
+        ClientSocket.Send(message);
+
+        var decision = DataReceiver.GetData(ClientSocket);
+
+        if (decision.ToLower() == "y")
+        {
+            currentlyLoggedUser.Inbox.Clear();
+            
+            using (StreamWriter file = File.CreateText($"users/{currentlyLoggedUser.Username}.json"))
+            {
+                var result = JsonConvert.SerializeObject(currentlyLoggedUser);
+                file.Write(result);
+            }
+            SaveList();
+            message = DataSender.SendData("All messages deleted.");
+            ClientSocket.Send(message);
+        }
+        else
+        {
+            message = DataSender.SendData("Deleting canceled.");
+            ClientSocket.Send(message);
+        }
     }
 }
