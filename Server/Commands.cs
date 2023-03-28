@@ -28,15 +28,37 @@ public static class Commands
     public static void HelpCommand()
     {
         var message = "Possible commands: \n" +
-                      "uptime - returns server lifetime.\n" +
-                      "info - returns server's version and creation date.\n" +
-                      "help - returns list of possible commands with short description.\n" +
-                      "stop - stops server and client running.\n";
+                      "send - send message to other user.\n" +
+                      "inbox - check your inbox.\n" +
+                      "clear - clear your inbox\n" +
+                      "uptime - return server lifetime.\n" +
+                      "info - return server's version and creation date.\n" +
+                      "help - return list of possible commands with short description.\n" +
+                      "logout - log out from your account.\n" +
+                      "stop - stop server and client running.\n";
                       
         var result = DataSender.SendData(message);
         ServerExecuter.ClientSocket.Send(result);
     }
 
+    public static void HelpCommandForAdmin()
+    {
+        var message = "Possible commands: \n" +
+                      "change - change user's privileges\n" +
+                      "delete - delete user\n"+
+                      "send - send message to other user.\n" +
+                      "inbox - check your inbox.\n" +
+                      "clear - clear your inbox\n" +
+                      "uptime - return server lifetime.\n" +
+                      "info - return server's version and creation date.\n" +
+                      "help - return list of possible commands with short description.\n" +
+                      "logout - log out from your account.\n" +
+                      "stop - stop server and client running.\n";
+                      
+        var result = DataSender.SendData(message);
+        ServerExecuter.ClientSocket.Send(result);
+    }
+    
     public static void StopCommand()
     {
         var message = "Shutting down...";

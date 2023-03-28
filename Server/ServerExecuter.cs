@@ -182,7 +182,7 @@ public static class ServerExecuter
                 break;
 
             case "help":
-                Commands.HelpCommand();
+                Commands.HelpCommandForAdmin();
                 break;
 
             case "logout":
