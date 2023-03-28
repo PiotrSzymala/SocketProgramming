@@ -5,7 +5,7 @@ This program is a simple client/server application based on data (JSON format) t
 
 Program demonstration:
 
-[![VIDEO](https://img.youtube.com/vi/9v4JPzvzREI/0.jpg)](https://www.youtube.com/watch?v=9v4JPzvzREI)
+[![VIDEO](https://img.youtube.com/vi/0BPFQBHBTXQ/0.jpg)](https://www.youtube.com/watch?v=0BPFQBHBTXQ)
 
 ## User management
 The application allows you to create a user and log in. The user can also send or check received messages and clear his inbox. In addition, the admin can delete users or grant them privileges.
