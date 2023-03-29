@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "SdpnSZwuf4J+5T6Ra2EL7LM0pFACkPYK5ts0N82sUfCcCNhm+nYiyVdDTLpdkNfQ7WAPPC9GXTLw78grc7YD+w==",
+  "dgSpecHash": "xLTjOD0FN6ybqnNjOAxi1RkaBRYSXFC1IYpXyc1hU2blW5Oc0nj2hHcxss8lOQl5tBfvqoBMYG9V/6ywaZwNnA==",
   "success": true,
-  "projectFilePath": "/Users/piotrszymala/RiderProjects/SocketProgramming/SocektProgramming.Tests/SocektProgramming.Tests.csproj",
+  "projectFilePath": "/Users/piotrszymala/RiderProjects/SocketProgramming/SocketProgramming.Tests/SocketProgramming.Tests.csproj",
   "expectedPackageFiles": [
     "/Users/piotrszymala/.nuget/packages/coverlet.collector/3.1.2/coverlet.collector.3.1.2.nupkg.sha512",
     "/Users/piotrszymala/.nuget/packages/microsoft.codecoverage/17.3.2/microsoft.codecoverage.17.3.2.nupkg.sha512",

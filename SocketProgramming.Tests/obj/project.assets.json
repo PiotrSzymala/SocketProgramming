@@ -5883,11 +5883,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/piotrszymala/RiderProjects/SocketProgramming/SocektProgramming.Tests/SocektProgramming.Tests.csproj",
-      "projectName": "SocektProgramming.Tests",
-      "projectPath": "/Users/piotrszymala/RiderProjects/SocketProgramming/SocektProgramming.Tests/SocektProgramming.Tests.csproj",
+      "projectUniqueName": "/Users/piotrszymala/RiderProjects/SocketProgramming/SocketProgramming.Tests/SocketProgramming.Tests.csproj",
+      "projectName": "SocketProgramming.Tests",
+      "projectPath": "/Users/piotrszymala/RiderProjects/SocketProgramming/SocketProgramming.Tests/SocketProgramming.Tests.csproj",
       "packagesPath": "/Users/piotrszymala/.nuget/packages/",
-      "outputPath": "/Users/piotrszymala/RiderProjects/SocketProgramming/SocektProgramming.Tests/obj/",
+      "outputPath": "/Users/piotrszymala/RiderProjects/SocketProgramming/SocketProgramming.Tests/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/piotrszymala/.nuget/NuGet/NuGet.Config"
