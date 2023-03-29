@@ -15,13 +15,19 @@ public class MessageToUser
         {
             if (value.Length > 255)
             {
-                _messageContent = value.Substring(0, 254);
+                _messageContent = value.Substring(0, 255);
             }
             else
             {
                 _messageContent = value;
             }
         }
+    }
+
+    public MessageToUser(string messageAuthor, string messageContent)
+    {
+        MessageAuthor = messageAuthor;
+        MessageContent = messageContent;
     }
 
     public MessageToUser()
