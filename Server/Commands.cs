@@ -1,19 +1,30 @@
 using System.Net.Sockets;
+using Shared;
 using Shared.Controllers;
 
 namespace Server;
 
-public static class Commands
+public class Commands
 {
+    private IDataSender _dataSender;
+    private IDataReceiver _dataReceiver;
+    private Socket _socket;
+
+    public Commands(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
+    {
+        _dataSender = dataSender;
+        _dataReceiver = dataReceiver;
+        _socket = socket;
+    }
     
-    public static void UptimeCommand()
+    public  void UptimeCommand()
     {
         var currentWorkingTime = DateTime.Now;
         var timeSpan = currentWorkingTime - ServerExecuter.ServerCreationTime;
         var message = $"Running time: {timeSpan}";
 
-        var result = DataSender.SendData(message);
-        ServerExecuter.ClientSocket.Send(result);
+        var result = _dataSender.SendData(message);
+        _socket.Send(result);
     }
 
     public static void InfoCommand()
