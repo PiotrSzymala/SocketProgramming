@@ -4,22 +4,32 @@ using Shared.Controllers;
 
 namespace Client;
 
-public static class ClientExecuter
+public  class ClientExecuter
 {
-    public static void ExecuteClient()
+    private IDataSender _dataSender;
+    private IDataReceiver _dataReceiver;
+    private Socket _sender;
+
+    public ClientExecuter(IDataSender dataSender, IDataReceiver dataReceiver, Socket sender)
+    {
+        _dataSender = dataSender;
+        _dataReceiver = dataReceiver;
+        _sender = sender;
+    }
+    public void ExecuteClient()
     {
         try
         {
-            using Socket sender = new Socket(Config.IpAddr.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
+                _sender = new Socket(Config.IpAddr.AddressFamily,
+                SocketType.Stream, ProtocolType.Tcp); //Going to be moved.
 
             try
             {
-                sender.Connect(Config.LocalEndPoint);
+                _sender.Connect(Config.LocalEndPoint);
 
-                Console.WriteLine($"Socket connected to -> {sender.RemoteEndPoint}");
+                Console.WriteLine($"Socket connected to -> {_sender.RemoteEndPoint}");
                 
-                var firstResponseFromServer = DataReceiver.GetData(sender);
+                var firstResponseFromServer = _dataReceiver.GetData(_sender);
                 Console.WriteLine(firstResponseFromServer);
 
                 string response;
@@ -27,10 +37,10 @@ public static class ClientExecuter
                 do
                 {
                     var commandToSend = Console.ReadLine().ToLower();
-                    var message = DataSender.SendData(commandToSend);
-                    sender.Send(message);
+                    var message = _dataSender.SendData(commandToSend);
+                    _sender.Send(message);
 
-                     response = DataReceiver.GetData(sender);
+                     response = _dataReceiver.GetData(_sender);
 
                     Console.WriteLine($"Response from Server -> {response}");
                 } while (response != "Shutting down...");
