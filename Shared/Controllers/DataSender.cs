@@ -4,9 +4,9 @@ using Shared.Models;
 
 namespace Shared.Controllers;
 
-public static class DataSender
+public class DataSender : IDataSender
 {
-    public static byte[] SendData(string messageContext)
+    public byte[] SendData(string messageContext)
     {
         var clientServerCommand = new CommandFromUser();
         clientServerCommand.Command = messageContext;

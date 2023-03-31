@@ -5,9 +5,9 @@ using Shared.Models;
 
 namespace Shared.Controllers;
 
-public static class DataReceiver
+public class DataReceiver : IDataReceiver
     {
-        public static string GetData(Socket socket)
+        public string GetData(Socket socket)
         {
             var bytesToReceive = new byte[1024];
             var numByte = socket.Receive(bytesToReceive);
@@ -15,7 +15,7 @@ public static class DataReceiver
             var receivedString = Encoding.ASCII.GetString(bytesToReceive, 0, numByte);
             var clientServerResponse = JsonConvert.DeserializeObject<CommandFromUser>(receivedString);
 
-            var dataToSend = clientServerResponse.Command;
-            return dataToSend;
+            var receivedCommand = clientServerResponse.Command;
+            return receivedCommand;
         }
     }
