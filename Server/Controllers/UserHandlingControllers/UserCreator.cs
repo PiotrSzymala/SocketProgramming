@@ -1,30 +1,40 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
+using Shared;
 using Shared.Controllers;
 using Shared.Models;
 
 namespace Server.Controllers.UserHandlingControllers;
 
-public static class UserCreator
+public class UserCreator
 {
-    public static void CreateUser(Socket clientSocket)
+    private IDataSender _dataSender;
+    private IDataReceiver _dataReceiver;
+    private Socket _socket;
+    public UserCreator(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
     {
-         var message = DataSender.SendData("Set username");
-         clientSocket.Send(message);
+        _dataSender = dataSender;
+        _dataReceiver = dataReceiver;
+        _socket = socket;
+    }
+    public void CreateUser()
+    {
+         var message = _dataSender.SendData("Set username");
+         _socket.Send(message);
         
-        var username = DataReceiver.GetData(clientSocket);
+        var username = _dataReceiver.GetData(_socket);
 
         if (!File.Exists($"users/{username}.json"))
         {
-            message = DataSender.SendData("Set password");
-            clientSocket.Send(message);
+            message = _dataSender.SendData("Set password");
+            _socket.Send(message);
             
-            var password = DataReceiver.GetData(clientSocket);
+            var password = _dataReceiver.GetData(_socket);
 
-            message = DataSender.SendData("If you want admin account type in a special password:");
-            clientSocket.Send(message);
+            message = _dataSender.SendData("If you want admin account type in a special password:");
+            _socket.Send(message);
             
-            var specialPassword = DataReceiver.GetData(clientSocket);
+            var specialPassword = _dataReceiver.GetData(_socket);
             var privileges = (specialPassword == "root123" ? Privileges.Admin : Privileges.User);
             
             var user = new User(username, password, privileges, new List<MessageToUser>());
@@ -39,13 +49,13 @@ public static class UserCreator
 
             var typeOfUser = user.Privileges == Privileges.Admin ? "Admin created" : "User created";
                 
-            message = DataSender.SendData(typeOfUser);
-            clientSocket.Send(message);
+            message = _dataSender.SendData(typeOfUser);
+            _socket.Send(message);
         }
         else
         {
-            message = DataSender.SendData("User already exists!");
-            clientSocket.Send(message);
+            message = _dataSender.SendData("User already exists!");
+            _socket.Send(message);
         }
     }
 }
