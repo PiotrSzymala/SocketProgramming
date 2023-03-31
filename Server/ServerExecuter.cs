@@ -9,16 +9,25 @@ using Shared.Models;
 
 namespace Server;
 
-public static class ServerExecuter
+public class ServerExecuter
 {
     public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static List<User> Users = new List<User>();
 
+    private IDataSender _dataSender;
+    private IDataReceiver _dataReceiver;
     private delegate void ChooseFunction(User currentlyLoggedUser, ref bool flag, ref bool logged);
 
-    public static Socket ClientSocket { get; set; }
+    private Socket _socket;
 
-    public static void ExecuteServer()
+    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
+    {
+        _dataSender = dataSender;
+        _dataReceiver = dataReceiver;
+        _socket = socket;
+    }
+    
+    public  void ExecuteServer()
     {
         using Socket listener = new Socket(Config.IpAddr.AddressFamily,
             SocketType.Stream, ProtocolType.Tcp);
@@ -29,7 +38,7 @@ public static class ServerExecuter
 
             Console.WriteLine("Waiting connection ... ");
 
-            ClientSocket = listener.Accept();
+            _socket = listener.Accept();
 
             Console.WriteLine("Connected");
 
@@ -39,24 +48,24 @@ public static class ServerExecuter
             string usersListString = File.ReadAllText("users/users.json");
             Users = JsonConvert.DeserializeObject<List<User>>(usersListString);
 
-            var message = DataSender.SendData("\nLogin or register:\n");
-            ClientSocket.Send(message);
+            var message = _dataSender.SendData("\nLogin or register:\n");
+            _socket.Send(message);
 
             bool flag = true;
             bool logged = false;
 
-            User curentlyLoggedUser = new User();
+            User currentlyLoggedUser = new User();
 
             while (flag)
             {
                 while (!logged)
                 {
-                    var reply = DataReceiver.GetData(ClientSocket);
+                    var reply = _dataReceiver.GetData(_socket);
 
                     switch (reply.ToLower())
                     {
                         case "login":
-                            if (UserLogger.LogUserIn(out curentlyLoggedUser))
+                            if (UserLogger.LogUserIn(out currentlyLoggedUser))
                             {
                                 logged = true;
                             }
@@ -64,19 +73,20 @@ public static class ServerExecuter
                             break;
 
                         case "register":
-                            UserCreator.CreateUser(ClientSocket);
+                            UserCreator creator = new UserCreator(new DataSender(), new DataReceiver(), _socket);
+                            creator.CreateUser();
                             break;
 
                         default:
-                            var wrong = DataSender.SendData("wrong command");
-                            ClientSocket.Send(wrong);
+                            var wrong = _dataSender.SendData("wrong command");
+                            _socket.Send(wrong);
                             break;
                     }
                 }
 
-                ChooseFunction myDel = curentlyLoggedUser.Privileges == Privileges.Admin ? MenuForAdmin : MenuForUser;
+                ChooseFunction myDel = currentlyLoggedUser.Privileges == Privileges.Admin ? MenuForAdmin : MenuForUser;
 
-                myDel.Invoke(curentlyLoggedUser, ref flag, ref logged);
+                myDel.Invoke(currentlyLoggedUser, ref flag, ref logged);
             }
         }
 
@@ -104,9 +114,9 @@ public static class ServerExecuter
         }
     }
 
-    private static void MenuForUser(User currentlyLoggedUser, ref bool flag, ref bool logged)
+    private  void MenuForUser(User currentlyLoggedUser, ref bool flag, ref bool logged)
     {
-        var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
+        var deserializedRequestFromClient = _dataReceiver.GetData(_socket);
         switch (deserializedRequestFromClient.ToLower())
         {
             case "send":
@@ -134,7 +144,7 @@ public static class ServerExecuter
                 break;
 
             case "logout":
-                ClientSocket.Send(DataSender.SendData("Logged out!"));
+                _socket.Send(_dataSender.SendData("Logged out!"));
                 logged = false;
                 break;
             
@@ -150,9 +160,9 @@ public static class ServerExecuter
         }
     }
 
-    private static void MenuForAdmin(User currentlyLoggedUser, ref bool flag, ref bool logged)
+    private  void MenuForAdmin(User currentlyLoggedUser, ref bool flag, ref bool logged)
     {
-        var deserializedRequestFromClient = DataReceiver.GetData(ClientSocket);
+        var deserializedRequestFromClient = _dataReceiver.GetData(_socket);
         switch (deserializedRequestFromClient.ToLower())
         {
             case "send":
@@ -188,7 +198,7 @@ public static class ServerExecuter
                 break;
 
             case "logout":
-                ClientSocket.Send(DataSender.SendData("Logged out!"));
+                _socket.Send(_dataSender.SendData("Logged out!"));
                 logged = false;
                 break;
             
