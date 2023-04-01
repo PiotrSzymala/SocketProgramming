@@ -7,13 +7,11 @@ namespace Server;
 public class Commands
 {
     private IDataSender _dataSender;
-    private IDataReceiver _dataReceiver;
     private Socket _socket;
 
-    public Commands(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
+    public Commands(IDataSender dataSender, Socket socket)
     {
         _dataSender = dataSender;
-        _dataReceiver = dataReceiver;
         _socket = socket;
     }
     
@@ -27,16 +25,16 @@ public class Commands
         _socket.Send(result);
     }
 
-    public static void InfoCommand()
+    public  void InfoCommand()
     {
         var message = $"Sever version number: {ServerInformation.ServerVersion}\n" +
                       $"Server creation date: {ServerInformation.ServerCreationDate}\n";
         
-        var result = DataSender.SendData(message);
-        ServerExecuter.ClientSocket.Send(result);
+        var result = _dataSender.SendData(message);
+        _socket.Send(result);
     }
 
-    public static void HelpCommand()
+    public  void HelpCommand()
     {
         var message = "\nPossible commands: \n" +
                       "send - send message to other user.\n" +
@@ -48,11 +46,11 @@ public class Commands
                       "logout - log out from your account.\n" +
                       "stop - stop server and client running.\n";
                       
-        var result = DataSender.SendData(message);
-        ServerExecuter.ClientSocket.Send(result);
+        var result = _dataSender.SendData(message);
+        _socket.Send(result);
     }
 
-    public static void HelpCommandForAdmin()
+    public  void HelpCommandForAdmin()
     {
         var message = "\nPossible commands: \n" +
                       "change - change user's privileges\n" +
@@ -66,26 +64,26 @@ public class Commands
                       "logout - log out from your account.\n" +
                       "stop - stop server and client running.\n";
                       
-        var result = DataSender.SendData(message);
-        ServerExecuter.ClientSocket.Send(result);
+        var result = _dataSender.SendData(message);
+        _socket.Send(result);
     }
     
-    public static void StopCommand()
+    public  void StopCommand()
     {
         var message = "Shutting down...";
         
-        var result = DataSender.SendData(message);
-        ServerExecuter.ClientSocket.Send(result);
+        var result = _dataSender.SendData(message);
+        _socket.Send(result);
         
-        ServerExecuter.ClientSocket.Shutdown(SocketShutdown.Both);
-        ServerExecuter.ClientSocket.Close();
+        _socket.Shutdown(SocketShutdown.Both);
+        _socket.Close();
     }
 
-    public static void WrongCommand()
+    public  void WrongCommand()
     {
         var message = "Wrong command\n";
        
-        var result = DataSender.SendData(message);
-        ServerExecuter.ClientSocket.Send(result);
+        var result = _dataSender.SendData(message);
+        _socket.Send(result);
     }
 }
