@@ -1,10 +1,9 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
 using Server.Controllers;
-using Server.Controllers.MessageHandlingControllers;
 using Server.Controllers.UserHandlingControllers;
+using Server.Models;
 using Shared;
-using Shared.Controllers;
 using Shared.Models;
 
 namespace Server;
@@ -16,15 +15,11 @@ public class ServerExecuter
 
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
-    private delegate void ChooseFunction(User currentlyLoggedUser, ref bool flag, ref bool logged);
 
-    private Socket _socket;
-
-    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
+    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver)
     {
         _dataSender = dataSender;
         _dataReceiver = dataReceiver;
-        _socket = socket;
     }
     
     public  void ExecuteServer()
@@ -38,7 +33,7 @@ public class ServerExecuter
 
             Console.WriteLine("Waiting connection ... ");
 
-            _socket = listener.Accept();
+            var clientSocket = listener.Accept();
 
             Console.WriteLine("Connected");
 
@@ -49,7 +44,7 @@ public class ServerExecuter
             Users = JsonConvert.DeserializeObject<List<User>>(usersListString);
 
             var message = _dataSender.SendData("\nLogin or register:\n");
-            _socket.Send(message);
+            clientSocket.Send(message);
 
             bool flag = true;
             bool logged = false;
@@ -60,12 +55,13 @@ public class ServerExecuter
             {
                 while (!logged)
                 {
-                    var reply = _dataReceiver.GetData(_socket);
+                    var reply = _dataReceiver.GetData(clientSocket);
 
                     switch (reply.ToLower())
                     {
                         case "login":
-                            if (UserLogger.LogUserIn(out currentlyLoggedUser))
+                            UserLogger userLogger = new UserLogger(_dataSender, _dataReceiver, clientSocket);
+                            if (userLogger.LogUserIn(out currentlyLoggedUser))
                             {
                                 logged = true;
                             }
@@ -73,20 +69,30 @@ public class ServerExecuter
                             break;
 
                         case "register":
-                            UserCreator creator = new UserCreator(new DataSender(), new DataReceiver(), _socket);
+                            UserCreator creator = new UserCreator(_dataSender, _dataReceiver, clientSocket);
                             creator.CreateUser();
                             break;
 
                         default:
                             var wrong = _dataSender.SendData("wrong command");
-                            _socket.Send(wrong);
+                            clientSocket.Send(wrong);
                             break;
                     }
                 }
 
-                ChooseFunction myDel = currentlyLoggedUser.Privileges == Privileges.Admin ? MenuForAdmin : MenuForUser;
-
-                myDel.Invoke(currentlyLoggedUser, ref flag, ref logged);
+                Menu menu;
+               
+                if (currentlyLoggedUser.Privileges == Privileges.Admin)
+                {
+                    menu = new AdminMenu(clientSocket,_dataReceiver,_dataSender, currentlyLoggedUser);
+                }
+                else
+                {
+                    menu = new UserMenu(clientSocket,_dataReceiver,_dataSender, currentlyLoggedUser);
+                }
+                
+                menu.DisplayMenu(ref flag, ref logged);
+                
             }
         }
 
@@ -111,106 +117,6 @@ public class ServerExecuter
         if (!Directory.Exists("users"))
         {
             Directory.CreateDirectory("users");
-        }
-    }
-
-    private  void MenuForUser(User currentlyLoggedUser, ref bool flag, ref bool logged)
-    {
-        var deserializedRequestFromClient = _dataReceiver.GetData(_socket);
-        switch (deserializedRequestFromClient.ToLower())
-        {
-            case "send":
-                MessageSender.SendMessage(currentlyLoggedUser);
-                break;
-            
-            case "inbox":
-                MessageChecker.CheckInbox(currentlyLoggedUser);
-                break;
-            
-            case "clear":
-                MessageBoxCleaner.ClearInbox(currentlyLoggedUser);
-                break;
-            
-            case "uptime":
-                Commands.UptimeCommand();
-                break;
-
-            case "info":
-                Commands.InfoCommand();
-                break;
-
-            case "help":
-                Commands.HelpCommand();
-                break;
-
-            case "logout":
-                _socket.Send(_dataSender.SendData("Logged out!"));
-                logged = false;
-                break;
-            
-            case "stop":
-                ListSaver.SaveList();
-                Commands.StopCommand();
-                flag = false;
-                break;
-            
-            default:
-                Commands.WrongCommand();
-                break;
-        }
-    }
-
-    private  void MenuForAdmin(User currentlyLoggedUser, ref bool flag, ref bool logged)
-    {
-        var deserializedRequestFromClient = _dataReceiver.GetData(_socket);
-        switch (deserializedRequestFromClient.ToLower())
-        {
-            case "send":
-                MessageSender.SendMessage(currentlyLoggedUser);
-                break;
-            
-            case "inbox":
-                MessageChecker.CheckInbox(currentlyLoggedUser);
-                break;
-            
-            case "clear":
-                MessageBoxCleaner.ClearInbox(currentlyLoggedUser);
-                break;
-            
-            case "change":
-                UserPrivilegesChanger.ChangePrivileges();
-                break;
-
-            case "delete":
-                UserRemover.RemoveUser();
-                break;
-
-            case "uptime":
-                Commands.UptimeCommand();
-                break;
-
-            case "info":
-                Commands.InfoCommand();
-                break;
-
-            case "help":
-                Commands.HelpCommandForAdmin();
-                break;
-
-            case "logout":
-                _socket.Send(_dataSender.SendData("Logged out!"));
-                logged = false;
-                break;
-            
-            case "stop":
-                ListSaver.SaveList();
-                Commands.StopCommand();
-                flag = false;
-                break;
-
-            default:
-                Commands.WrongCommand();
-                break;
         }
     }
 }

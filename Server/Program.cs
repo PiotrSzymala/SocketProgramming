@@ -1,10 +1,13 @@
-﻿namespace Server
+﻿using Shared.Controllers;
+
+namespace Server
 {
     public static class Program
     {
         private static void Main(string[] args)
         {
-            ServerExecuter.ExecuteServer();
+            ServerExecuter serverExecuter = new ServerExecuter(new DataSender(), new DataReceiver());
+            serverExecuter.ExecuteServer();
         }
         
     }
