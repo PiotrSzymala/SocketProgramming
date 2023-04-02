@@ -1,17 +1,32 @@
+using System.Net.Sockets;
 using Newtonsoft.Json;
-using Shared.Controllers;
+using Shared;
+using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.MessageHandlingControllers;
 
-public static class MessageBoxCleaner
+public class MessageBoxCleaner
 {
-    public static void ClearInbox(User currentlyLoggedUser)
+    private IDataSender _dataSender;
+    private IDataReceiver _dataReceiver;
+    private Socket _socket;
+    public MessageBoxCleaner(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
     {
-        var message = DataSender.SendData("All messages will be deleted. Are you sure? (y/n)");
-        ServerExecuter.ClientSocket.Send(message);
+        _dataSender = dataSender;
+        _dataReceiver = dataReceiver;
+        _socket = socket;
+    }
+    
+    public  void ClearInbox(User currentlyLoggedUser)
+    {
+        var dataSender = new DataSendHandler(_dataSender);
+        var dataReceiver = new DataReceiveHandler(_dataReceiver);
 
-        var decision = DataReceiver.GetData(ServerExecuter.ClientSocket);
+        var message = dataSender.Send("All messages will be deleted. Are you sure? (y/n)");
+       _socket.Send(message);
+
+        var decision = dataReceiver.Receive(_socket);
 
         if (decision.ToLower() == "y")
         {
@@ -25,13 +40,13 @@ public static class MessageBoxCleaner
 
             ListSaver.SaveList();
             
-            message = DataSender.SendData("All messages deleted.");
-            ServerExecuter.ClientSocket.Send(message);
+            message = dataSender.Send("All messages deleted.");
+            _socket.Send(message);
         }
         else
         {
-            message = DataSender.SendData("Deleting canceled.");
-            ServerExecuter.ClientSocket.Send(message);
+            message = dataSender.Send("Deleting canceled.");
+            _socket.Send(message);
         }
     }
 }
