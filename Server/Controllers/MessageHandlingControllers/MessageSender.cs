@@ -1,17 +1,31 @@
+using System.Net.Sockets;
 using Newtonsoft.Json;
-using Shared.Controllers;
+using Shared;
+using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.MessageHandlingControllers;
 
-public static class MessageSender
+public  class MessageSender
 {
-    public static void SendMessage(User sender)
+    private IDataSender _dataSender;
+    private IDataReceiver _dataReceiver;
+    private Socket _socket;
+    public MessageSender(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
     {
-        var message = DataSender.SendData("To whom do you want to send the message?");
-        ServerExecuter.ClientSocket.Send(message);
+        _dataSender = dataSender;
+        _dataReceiver = dataReceiver;
+        _socket = socket;
+    }
+    public  void SendMessage(User sender)
+    {
+        var dataSender = new DataSendHandler(_dataSender);
+        var dataReceiver = new DataReceiveHandler(_dataReceiver);
+        
+        var message = dataSender.Send("To whom do you want to send the message?");
+        _socket.Send(message);
 
-        var username = DataReceiver.GetData(ServerExecuter.ClientSocket);
+        var username = dataReceiver.Receive(_socket);
 
         var userToSendMessage = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
 
@@ -19,15 +33,15 @@ public static class MessageSender
         {
             if (userToSendMessage.Inbox.Count >= 5 && userToSendMessage.Privileges != Privileges.Admin)
             {
-                message = DataSender.SendData($"The inbox of {userToSendMessage.Username} is full.");
-                ServerExecuter.ClientSocket.Send(message);
+                message = dataSender.Send($"The inbox of {userToSendMessage.Username} is full.");
+                _socket.Send(message);
             }
             else
             {
-                message = DataSender.SendData("Write your message:");
-                ServerExecuter.ClientSocket.Send(message);
+                message = dataSender.Send("Write your message:");
+                _socket.Send(message);
 
-                var messageContent = DataReceiver.GetData(ServerExecuter.ClientSocket);
+                var messageContent =dataReceiver.Receive(_socket);
 
                 userToSendMessage.Inbox.Add(new MessageToUser()
                 {
@@ -42,14 +56,14 @@ public static class MessageSender
                 }
                 ListSaver.SaveList();
                 
-                message = DataSender.SendData("The message has been sent.");
-                ServerExecuter.ClientSocket.Send(message);
+                message = dataSender.Send("The message has been sent.");
+                _socket.Send(message);
             }
         }
         else
         {
-            message = DataSender.SendData("User does not exist.");
-            ServerExecuter.ClientSocket.Send(message);
+            message = dataSender.Send("User does not exist.");
+            _socket.Send(message);
         }
     }
 }
