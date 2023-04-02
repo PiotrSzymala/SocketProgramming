@@ -1,15 +1,29 @@
-using Shared.Controllers;
+using System.Net.Sockets;
+using Shared;
+using Shared.Handlers;
 
 namespace Server.Controllers.UserHandlingControllers;
 
-public static class UserRemover
+public  class UserRemover
 {
-    public static void RemoveUser()
+    private IDataSender _dataSender;
+    private IDataReceiver _dataReceiver;
+    private Socket _socket;
+    public UserRemover(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
     {
-        var message = DataSender.SendData("Which user you want to delete?");
-        ServerExecuter.ClientSocket.Send(message);
+        _dataSender = dataSender;
+        _dataReceiver = dataReceiver;
+        _socket = socket;
+    }
+    public void RemoveUser()
+    {
+        var dataSender = new DataSendHandler(_dataSender);
+        var dataReceiver = new DataReceiveHandler(_dataReceiver);
+        
+        var message = dataSender.Send("Which user you want to delete?");
+        _socket.Send(message);
 
-        var username = DataReceiver.GetData(ServerExecuter.ClientSocket);
+        var username = dataReceiver.Receive(_socket);
 
         var userToDelete = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
 
@@ -20,13 +34,13 @@ public static class UserRemover
             
             ListSaver.SaveList();
             
-            message = DataSender.SendData("User has been deleted.");
-            ServerExecuter.ClientSocket.Send(message);
+            message = dataSender.Send("User has been deleted.");
+            _socket.Send(message);
         }
         else
         {
-            message = DataSender.SendData("User does not exist.");
-            ServerExecuter.ClientSocket.Send(message);
+            message = dataSender.Send("User does not exist.");
+            _socket.Send(message);
         }
     }
 }
