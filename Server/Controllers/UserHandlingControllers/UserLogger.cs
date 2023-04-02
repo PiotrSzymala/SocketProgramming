@@ -1,17 +1,31 @@
+using System.Net.Sockets;
 using Newtonsoft.Json;
-using Shared.Controllers;
+using Shared;
+using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.UserHandlingControllers;
 
-public static class UserLogger
+public  class UserLogger
 {
-    public static bool LogUserIn(out User loggedUser)
+    private IDataSender _dataSender;
+    private IDataReceiver _dataReceiver;
+    private Socket _socket;
+    public UserLogger(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
     {
-        var message = DataSender.SendData("Username:");
-        ServerExecuter.ClientSocket.Send(message);
+        _dataSender = dataSender;
+        _dataReceiver = dataReceiver;
+        _socket = socket;
+    }
+    public  bool LogUserIn(out User loggedUser)
+    {
+        var dataSender = new DataSendHandler(_dataSender);
+        var dataReceiver = new DataReceiveHandler(_dataReceiver);
         
-        var username = DataReceiver.GetData(ServerExecuter.ClientSocket);
+        var message = dataSender.Send("Username:");
+        _socket.Send(message);
+        
+        var username = dataReceiver.Receive(_socket);
         loggedUser = null;
 
         var user = ServerExecuter.Users.FirstOrDefault(x => x.Username.Equals(username));
@@ -21,26 +35,26 @@ public static class UserLogger
             var json = File.ReadAllText($"users/{username}.json");
             var deserializedUser = JsonConvert.DeserializeObject<User>(json);
             
-            message = DataSender.SendData("Passsword:");
-            ServerExecuter.ClientSocket.Send(message);
+            message = dataSender.Send("Passsword:");
+            _socket.Send(message);
         
-            var password = DataReceiver.GetData(ServerExecuter.ClientSocket);
+            var password = dataReceiver.Receive(_socket);
 
             if (password.Equals(deserializedUser.Password))
             {
-                message = DataSender.SendData("Logged! Type 'help' to get list of commands:");
-                ServerExecuter.ClientSocket.Send(message);
+                message = dataSender.Send("Logged! Type 'help' to get list of commands:");
+                _socket.Send(message);
                 loggedUser = user;
                 return true;
             }
 
-            message = DataSender.SendData("Wrong password!");
-            ServerExecuter.ClientSocket.Send(message);
+            message = dataSender.Send("Wrong password!");
+            _socket.Send(message);
             return false;
         }
 
-        message = DataSender.SendData("User does not exist.");
-        ServerExecuter.ClientSocket.Send(message);
+        message = dataSender.Send("User does not exist.");
+        _socket.Send(message);
 
         return false;
     }
