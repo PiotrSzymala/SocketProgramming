@@ -1,17 +1,31 @@
+using System.Net.Sockets;
 using Newtonsoft.Json;
-using Shared.Controllers;
+using Shared;
+using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.UserHandlingControllers;
 
-public static class UserPrivilegesChanger
+public class UserPrivilegesChanger
 {
-    public static void ChangePrivileges()
+    private IDataSender _dataSender;
+    private IDataReceiver _dataReceiver;
+    private Socket _socket;
+    public UserPrivilegesChanger(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
     {
-        var message = DataSender.SendData("Which user's privileges you want to change?");
-        ServerExecuter.ClientSocket.Send(message);
+        _dataSender = dataSender;
+        _dataReceiver = dataReceiver;
+        _socket = socket;
+    }
+    public void ChangePrivileges()
+    {
+        var dataSender = new DataSendHandler(_dataSender);
+        var dataReceiver = new DataReceiveHandler(_dataReceiver);
         
-        var username = DataReceiver.GetData(ServerExecuter.ClientSocket);
+        var message = dataSender.Send("Which user's privileges you want to change?");
+        _socket.Send(message);
+        
+        var username = dataReceiver.Receive(_socket);
 
         var userToChangePrivileges = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
 
@@ -26,13 +40,13 @@ public static class UserPrivilegesChanger
             }
             ListSaver.SaveList();
             
-            message = DataSender.SendData($"Privileges for {userToChangePrivileges.Username} changed.");
-            ServerExecuter.ClientSocket.Send(message);
+            message = dataSender.Send($"Privileges for {userToChangePrivileges.Username} changed.");
+            _socket.Send(message);
         }
         else
         {
-            message = DataSender.SendData("User does not exist.");
-            ServerExecuter.ClientSocket.Send(message);
+            message = dataSender.Send("User does not exist.");
+            _socket.Send(message);
         }
     }
 }
