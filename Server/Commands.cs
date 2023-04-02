@@ -1,6 +1,6 @@
 using System.Net.Sockets;
+using Server.Models;
 using Shared;
-using Shared.Controllers;
 
 namespace Server;
 
