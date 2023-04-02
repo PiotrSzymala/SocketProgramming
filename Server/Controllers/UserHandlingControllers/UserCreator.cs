@@ -1,7 +1,7 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
 using Shared;
-using Shared.Controllers;
+using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.UserHandlingControllers;
@@ -19,22 +19,25 @@ public class UserCreator
     }
     public void CreateUser()
     {
-         var message = _dataSender.SendData("Set username");
-         _socket.Send(message);
+        var dataSender = new DataSendHandler(_dataSender);
+        var dataReceiver = new DataReceiveHandler(_dataReceiver);
+         
+        var message = dataSender.Send("Set username");
+        _socket.Send(message);
         
-        var username = _dataReceiver.GetData(_socket);
+        var username = dataReceiver.Receive(_socket);
 
         if (!File.Exists($"users/{username}.json"))
         {
-            message = _dataSender.SendData("Set password");
+            message = dataSender.Send("Set password");
             _socket.Send(message);
             
-            var password = _dataReceiver.GetData(_socket);
+            var password = dataReceiver.Receive(_socket);
 
-            message = _dataSender.SendData("If you want admin account type in a special password:");
+            message = dataSender.Send("If you want admin account type in a special password:");
             _socket.Send(message);
             
-            var specialPassword = _dataReceiver.GetData(_socket);
+            var specialPassword = dataReceiver.Receive(_socket);
             var privileges = (specialPassword == "root123" ? Privileges.Admin : Privileges.User);
             
             var user = new User(username, password, privileges, new List<MessageToUser>());
@@ -49,12 +52,12 @@ public class UserCreator
 
             var typeOfUser = user.Privileges == Privileges.Admin ? "Admin created" : "User created";
                 
-            message = _dataSender.SendData(typeOfUser);
+            message = dataSender.Send(typeOfUser);
             _socket.Send(message);
         }
         else
         {
-            message = _dataSender.SendData("User already exists!");
+            message = dataSender.Send("User already exists!");
             _socket.Send(message);
         }
     }
