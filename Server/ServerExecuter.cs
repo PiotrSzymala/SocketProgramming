@@ -79,20 +79,11 @@ public class ServerExecuter
                             break;
                     }
                 }
+                
 
-                Menu menu;
-               
-                if (currentlyLoggedUser.Privileges == Privileges.Admin)
-                {
-                    menu = new AdminMenu(clientSocket,_dataReceiver,_dataSender, currentlyLoggedUser);
-                }
-                else
-                {
-                    menu = new UserMenu(clientSocket,_dataReceiver,_dataSender, currentlyLoggedUser);
-                }
+                var menu = GetMenu(currentlyLoggedUser.Privileges, clientSocket, currentlyLoggedUser);
                 
                 menu.DisplayMenu(ref flag, ref logged);
-                
             }
         }
 
@@ -102,6 +93,15 @@ public class ServerExecuter
             ListSaver.SaveList();
         }
     }
+
+    private Menu GetMenu(Privileges privileges, Socket socket, User user)
+    =>
+        privileges switch
+        { 
+            Privileges.Admin => new AdminMenu(socket,_dataReceiver, _dataSender,user),
+            Privileges.User => new UserMenu(socket,_dataReceiver, _dataSender,user),
+            _ => throw  new NotImplementedException()
+        };
 
     private static void CreateFileForUsers()
     {
