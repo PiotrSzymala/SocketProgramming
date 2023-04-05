@@ -1,37 +1,50 @@
 using System.Net.Sockets;
 using Server.Controllers;
 using Server.Controllers.MessageHandlingControllers;
+using Server.Controllers.UserHandlingControllers;
+using Server.Interfaces;
 using Shared;
 using Shared.Models;
 
 namespace Server.Models;
 
-public class UserMenu : Menu
+public class UserMenu : IMenu
 {
-    public UserMenu(Socket socket, IDataReceiver dataReceiver, IDataSender dataSender, User user ): base(socket, dataReceiver, dataSender, user)
+
+    private Socket _socket;
+    private IDataReceiver _dataReceiver;
+    private IDataSender _dataSender;
+    private User _user;
+    private IMessageSender _messageSender;
+    private IMessageChecker _messageChecker;
+    private IMessageBoxCleaner _messageBoxCleaner;
+    public UserMenu(Socket socket, IDataReceiver dataReceiver, IDataSender dataSender, User user, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner)
     {
-        
+        _socket = socket;
+        _dataReceiver = dataReceiver;
+        _dataSender = dataSender;
+        _user = user;
+        _messageSender = messageSender;
+        _messageChecker = messageChecker;
+        _messageBoxCleaner = messageBoxCleaner;
     }
 
-    public override void DisplayMenu( ref bool flag, ref bool logged)
+    public  void DisplayMenu( ref bool flag, ref bool logged)
     {
         var deserializedRequestFromClient = _dataReceiver.GetData(_socket);
         Commands commands = new Commands(_dataSender, _socket);
         switch (deserializedRequestFromClient.ToLower())
         {
             case "send":
-                MessageSender messageSender = new MessageSender(_dataSender, _dataReceiver, _socket);
-                messageSender.SendMessage(_user);
+                _messageSender.SendMessage(_user);
                 break;
             
             case "inbox":
-                MessageChecker messageChecker = new MessageChecker(_dataSender, _dataReceiver, _socket);
-                messageChecker.CheckInbox(_user);
+                _messageChecker.CheckInbox(_user);
                 break;
             
             case "clear":
-                MessageBoxCleaner messageBoxCleaner = new MessageBoxCleaner(_dataSender, _dataReceiver, _socket);
-                messageBoxCleaner.ClearInbox(_user);
+                _messageBoxCleaner.ClearInbox(_user);
                 break;
             
             case "uptime":

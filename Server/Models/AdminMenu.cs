@@ -2,18 +2,34 @@ using System.Net.Sockets;
 using Server.Controllers;
 using Server.Controllers.MessageHandlingControllers;
 using Server.Controllers.UserHandlingControllers;
+using Server.Interfaces;
 using Shared;
 using Shared.Models;
 
 namespace Server.Models;
 
-public class AdminMenu : Menu
+public class AdminMenu : IMenu
 {
-    public AdminMenu(Socket socket, IDataReceiver dataReceiver, IDataSender dataSender, User user ): base(socket, dataReceiver, dataSender, user)
+    
+    private Socket _socket;
+    private IDataReceiver _dataReceiver;
+    private IDataSender _dataSender;
+    private User _user;
+    private IUserPrivilegesChanger _userPrivilegesChanger;
+    private IUserRemover _userRemover;
+
+
+    public AdminMenu(Socket socket, IDataReceiver dataReceiver, IDataSender dataSender, User user, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover)
     {
+        _socket = socket;
+        _dataReceiver = dataReceiver;
+        _dataSender = dataSender;
+        _user = user;
+        _userPrivilegesChanger = userPrivilegesChanger;
+        _userRemover = userRemover;
     }
 
-    public override void DisplayMenu(ref bool flag, ref bool logged)
+    public void DisplayMenu(ref bool flag, ref bool logged)
     {
         var deserializedRequestFromClient = _dataReceiver.GetData(_socket);
         Commands commands = new Commands(_dataSender, _socket);
@@ -36,14 +52,11 @@ public class AdminMenu : Menu
                 break;
             
             case "change":
-                UserPrivilegesChanger userPrivilegesChanger =
-                    new UserPrivilegesChanger(_dataSender, _dataReceiver, _socket);
-                userPrivilegesChanger.ChangePrivileges();
+                _userPrivilegesChanger.ChangePrivileges();
                 break;
 
             case "delete":
-                UserRemover userRemover = new UserRemover(_dataSender, _dataReceiver, _socket);
-                userRemover.RemoveUser();
+                _userRemover.RemoveUser();
                 break;
 
             case "uptime":
