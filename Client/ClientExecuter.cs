@@ -8,26 +8,28 @@ public  class ClientExecuter
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
+    private Socket _socket;
 
-    public ClientExecuter(IDataSender dataSender, IDataReceiver dataReceiver)
+    public ClientExecuter(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
     {
         _dataSender = dataSender;
         _dataReceiver = dataReceiver;
+        _socket = socket;
     }
     public void ExecuteClient()
     {
         try
         {
-                Socket sender = new Socket(Config.IpAddr.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
+                // Socket sender = new Socket(Config.IpAddr.AddressFamily,
+                // SocketType.Stream, ProtocolType.Tcp);
 
             try
             {
-                sender.Connect(Config.LocalEndPoint);
+                _socket.Connect(Config.LocalEndPoint);
 
-                Console.WriteLine($"Socket connected to -> {sender.RemoteEndPoint}");
+                Console.WriteLine($"Socket connected to -> {_socket.RemoteEndPoint}");
                 
-                var firstResponseFromServer = _dataReceiver.GetData(sender);
+                var firstResponseFromServer = _dataReceiver.GetData(_socket);
                 Console.WriteLine(firstResponseFromServer);
 
                 string response;
@@ -36,9 +38,9 @@ public  class ClientExecuter
                 {
                     var commandToSend = Console.ReadLine().ToLower();
                     var message = _dataSender.SendData(commandToSend);
-                    sender.Send(message);
+                    _socket.Send(message);
 
-                     response = _dataReceiver.GetData(sender);
+                     response = _dataReceiver.GetData(_socket);
 
                     Console.WriteLine($"Response from Server -> {response}");
                 } while (response != "Shutting down...");
