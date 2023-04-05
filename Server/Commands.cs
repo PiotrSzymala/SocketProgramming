@@ -15,7 +15,7 @@ public class Commands
         _socket = socket;
     }
     
-    public  void UptimeCommand()
+    public void UptimeCommand()
     {
         var currentWorkingTime = DateTime.Now;
         var timeSpan = currentWorkingTime - ServerExecuter.ServerCreationTime;
@@ -25,7 +25,7 @@ public class Commands
         _socket.Send(result);
     }
 
-    public  void InfoCommand()
+    public void InfoCommand()
     {
         var message = $"Sever version number: {ServerInformation.ServerVersion}\n" +
                       $"Server creation date: {ServerInformation.ServerCreationDate}\n";

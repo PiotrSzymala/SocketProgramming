@@ -1,12 +1,13 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
+using Server.Interfaces;
 using Shared;
 using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.MessageHandlingControllers;
 
-public  class MessageSender
+public  class MessageSender : IMessageSender
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
@@ -17,15 +18,12 @@ public  class MessageSender
         _dataReceiver = dataReceiver;
         _socket = socket;
     }
-    public  void SendMessage(User sender)
+    public void SendMessage(User sender)
     {
-        var dataSender = new DataSendHandler(_dataSender);
-        var dataReceiver = new DataReceiveHandler(_dataReceiver);
-        
-        var message = dataSender.Send("To whom do you want to send the message?");
+        var message = _dataSender.SendData("To whom do you want to send the message?");
         _socket.Send(message);
 
-        var username = dataReceiver.Receive(_socket);
+        var username = _dataReceiver.GetData(_socket);
 
         var userToSendMessage = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
 
@@ -33,15 +31,15 @@ public  class MessageSender
         {
             if (userToSendMessage.Inbox.Count >= 5 && userToSendMessage.Privileges != Privileges.Admin)
             {
-                message = dataSender.Send($"The inbox of {userToSendMessage.Username} is full.");
+                message = _dataSender.SendData($"The inbox of {userToSendMessage.Username} is full.");
                 _socket.Send(message);
             }
             else
             {
-                message = dataSender.Send("Write your message:");
+                message = _dataSender.SendData("Write your message:");
                 _socket.Send(message);
 
-                var messageContent =dataReceiver.Receive(_socket);
+                var messageContent = _dataReceiver.GetData(_socket);
 
                 userToSendMessage.Inbox.Add(new MessageToUser()
                 {
@@ -56,13 +54,13 @@ public  class MessageSender
                 }
                 ListSaver.SaveList();
                 
-                message = dataSender.Send("The message has been sent.");
+                message = _dataSender.SendData("The message has been sent.");
                 _socket.Send(message);
             }
         }
         else
         {
-            message = dataSender.Send("User does not exist.");
+            message = _dataSender.SendData("User does not exist.");
             _socket.Send(message);
         }
     }
