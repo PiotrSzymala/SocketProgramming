@@ -1,12 +1,13 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
+using Server.Interfaces;
 using Shared;
 using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.UserHandlingControllers;
 
-public  class UserLogger
+public class UserLogger : IUserLogger
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
@@ -17,15 +18,12 @@ public  class UserLogger
         _dataReceiver = dataReceiver;
         _socket = socket;
     }
-    public  bool LogUserIn(out User loggedUser)
+    public bool LogUserIn(out User loggedUser)
     {
-        var dataSender = new DataSendHandler(_dataSender);
-        var dataReceiver = new DataReceiveHandler(_dataReceiver);
-        
-        var message = dataSender.Send("Username:");
+        var message = _dataSender.SendData("Username:");
         _socket.Send(message);
         
-        var username = dataReceiver.Receive(_socket);
+        var username = _dataReceiver.GetData(_socket);
         loggedUser = null;
 
         var user = ServerExecuter.Users.FirstOrDefault(x => x.Username.Equals(username));
@@ -35,25 +33,25 @@ public  class UserLogger
             var json = File.ReadAllText($"users/{username}.json");
             var deserializedUser = JsonConvert.DeserializeObject<User>(json);
             
-            message = dataSender.Send("Passsword:");
+            message = _dataSender.SendData("Passsword:");
             _socket.Send(message);
         
-            var password = dataReceiver.Receive(_socket);
+            var password = _dataReceiver.GetData(_socket);
 
             if (password.Equals(deserializedUser.Password))
             {
-                message = dataSender.Send("Logged! Type 'help' to get list of commands:");
+                message = _dataSender.SendData("Logged! Type 'help' to get list of commands:");
                 _socket.Send(message);
                 loggedUser = user;
                 return true;
             }
 
-            message = dataSender.Send("Wrong password!");
+            message = _dataSender.SendData("Wrong password!");
             _socket.Send(message);
             return false;
         }
 
-        message = dataSender.Send("User does not exist.");
+        message = _dataSender.SendData("User does not exist.");
         _socket.Send(message);
 
         return false;
