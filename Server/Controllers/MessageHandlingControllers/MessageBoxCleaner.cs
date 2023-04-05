@@ -1,12 +1,13 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
+using Server.Interfaces;
 using Shared;
 using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.MessageHandlingControllers;
 
-public class MessageBoxCleaner
+public class MessageBoxCleaner : IMessageBoxCleaner
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
@@ -18,15 +19,12 @@ public class MessageBoxCleaner
         _socket = socket;
     }
     
-    public  void ClearInbox(User currentlyLoggedUser)
+    public void ClearInbox(User currentlyLoggedUser)
     {
-        var dataSender = new DataSendHandler(_dataSender);
-        var dataReceiver = new DataReceiveHandler(_dataReceiver);
-
-        var message = dataSender.Send("All messages will be deleted. Are you sure? (y/n)");
+        var message = _dataSender.SendData("All messages will be deleted. Are you sure? (y/n)");
        _socket.Send(message);
 
-        var decision = dataReceiver.Receive(_socket);
+        var decision = _dataReceiver.GetData(_socket);
 
         if (decision.ToLower() == "y")
         {
@@ -40,12 +38,12 @@ public class MessageBoxCleaner
 
             ListSaver.SaveList();
             
-            message = dataSender.Send("All messages deleted.");
+            message = _dataSender.SendData("All messages deleted.");
             _socket.Send(message);
         }
         else
         {
-            message = dataSender.Send("Deleting canceled.");
+            message = _dataSender.SendData("Deleting canceled.");
             _socket.Send(message);
         }
     }
