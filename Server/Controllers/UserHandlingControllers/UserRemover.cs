@@ -1,10 +1,11 @@
 using System.Net.Sockets;
+using Server.Interfaces;
 using Shared;
 using Shared.Handlers;
 
 namespace Server.Controllers.UserHandlingControllers;
 
-public  class UserRemover
+public  class UserRemover : IUserRemover
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
@@ -17,13 +18,10 @@ public  class UserRemover
     }
     public void RemoveUser()
     {
-        var dataSender = new DataSendHandler(_dataSender);
-        var dataReceiver = new DataReceiveHandler(_dataReceiver);
-        
-        var message = dataSender.Send("Which user you want to delete?");
+        var message = _dataSender.SendData("Which user you want to delete?");
         _socket.Send(message);
 
-        var username = dataReceiver.Receive(_socket);
+        var username = _dataReceiver.GetData(_socket);
 
         var userToDelete = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
 
@@ -34,12 +32,12 @@ public  class UserRemover
             
             ListSaver.SaveList();
             
-            message = dataSender.Send("User has been deleted.");
+            message = _dataSender.SendData("User has been deleted.");
             _socket.Send(message);
         }
         else
         {
-            message = dataSender.Send("User does not exist.");
+            message = _dataSender.SendData("User does not exist.");
             _socket.Send(message);
         }
     }
