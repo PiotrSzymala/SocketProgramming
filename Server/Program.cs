@@ -8,7 +8,14 @@ namespace Server
     {
         private static void Main(string[] args)
         {
-            ServerExecuter serverExecuter = new ServerExecuter(new DataSender(), new DataReceiver());
+            Socket socket = new Socket(Config.IpAddr.AddressFamily,
+                SocketType.Stream, ProtocolType.Tcp);
+            
+            ServerExecuter serverExecuter = new ServerExecuter(
+                Factory.CreateDataSender(),Factory.CreateDataReceiver(), Factory.CreateUserCreator(socket), Factory.CreateUserLogger(socket),
+                Factory.CreateUserUserPrivilegesChanger(socket),Factory.CreateUserRemover(socket),Factory.CreateMessageSender(socket),
+                Factory.CreateMessageChecker(socket),Factory.CreateMessageBoxCleaner(socket),socket);
+            
             serverExecuter.ExecuteServer();
         }
         

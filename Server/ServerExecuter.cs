@@ -2,6 +2,7 @@ using System.Net.Sockets;
 using Newtonsoft.Json;
 using Server.Controllers;
 using Server.Controllers.UserHandlingControllers;
+using Server.Interfaces;
 using Server.Models;
 using Shared;
 using Shared.Models;
@@ -12,28 +13,43 @@ public class ServerExecuter
 {
     public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static List<User> Users = new List<User>();
-
+    
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
+    private IUserCreator _userCreator;
+    private IUserLogger _userLogger;
+    private IUserPrivilegesChanger _userPrivilegesChanger;
+    private IUserRemover _userRemover;
+    private IMessageSender _messageSender;
+    private IMessageChecker _messageChecker;
+    private IMessageBoxCleaner _messageBoxCleaner;
+    private Socket _socket;
 
-    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver)
+    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver, IUserCreator userCreator, IUserLogger userLogger, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner, Socket socket)
     {
         _dataSender = dataSender;
         _dataReceiver = dataReceiver;
+        _userCreator = userCreator;
+        _userLogger = userLogger;
+        _userPrivilegesChanger = userPrivilegesChanger;
+        _userRemover = userRemover;
+        _messageSender = messageSender;
+        _messageChecker = messageChecker;
+        _messageBoxCleaner = messageBoxCleaner;
+        _socket = socket;
     }
     
     public  void ExecuteServer()
     {
-        using Socket listener = new Socket(Config.IpAddr.AddressFamily,
-            SocketType.Stream, ProtocolType.Tcp);
+       
         try
         {
-            listener.Bind(Config.LocalEndPoint);
-            listener.Listen(10);
+            _socket.Bind(Config.LocalEndPoint);
+            _socket.Listen(10);
 
             Console.WriteLine("Waiting connection ... ");
 
-            var clientSocket = listener.Accept();
+            var clientSocket = _socket.Accept();
 
             Console.WriteLine("Connected");
 
@@ -60,17 +76,14 @@ public class ServerExecuter
                     switch (reply.ToLower())
                     {
                         case "login":
-                            UserLogger userLogger = new UserLogger(_dataSender, _dataReceiver, clientSocket);
-                            if (userLogger.LogUserIn(out currentlyLoggedUser))
+                            if (_userLogger.LogUserIn(out currentlyLoggedUser))
                             {
                                 logged = true;
                             }
-
                             break;
 
                         case "register":
-                            UserCreator creator = new UserCreator(_dataSender, _dataReceiver, clientSocket);
-                            creator.CreateUser();
+                            _userCreator.CreateUser();
                             break;
 
                         default:
@@ -94,12 +107,12 @@ public class ServerExecuter
         }
     }
 
-    private Menu GetMenu(Privileges privileges, Socket socket, User user)
+    private IMenu GetMenu(Privileges privileges, Socket socket, User user)
     =>
         privileges switch
         { 
-            Privileges.Admin => new AdminMenu(socket,_dataReceiver, _dataSender,user),
-            Privileges.User => new UserMenu(socket,_dataReceiver, _dataSender,user),
+            Privileges.Admin => new AdminMenu(socket,_dataReceiver, _dataSender,user,_userPrivilegesChanger,_userRemover),
+            Privileges.User => new UserMenu(socket,_dataReceiver, _dataSender,user, _messageSender, _messageChecker,_messageBoxCleaner),
             _ => throw  new NotImplementedException()
         };
 
