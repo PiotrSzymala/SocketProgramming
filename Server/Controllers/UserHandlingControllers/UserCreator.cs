@@ -2,7 +2,6 @@ using System.Net.Sockets;
 using Newtonsoft.Json;
 using Server.Interfaces;
 using Shared;
-using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.UserHandlingControllers;
@@ -24,7 +23,7 @@ public class UserCreator : IUserCreator
         _socket.Send(message);
 
         var username = _dataReceiver.GetData(_socket);
-
+        
         if (!File.Exists($"users/{username}.json"))
         {
             message = _dataSender.SendData("Set password");
