@@ -1,6 +1,5 @@
 using System.Net.Sockets;
 using Shared;
-using Shared.Controllers;
 
 namespace Client;
 
@@ -18,15 +17,9 @@ public  class ClientExecuter
     }
     public void ExecuteClient()
     {
-        try
-        {
-                // Socket sender = new Socket(Config.IpAddr.AddressFamily,
-                // SocketType.Stream, ProtocolType.Tcp);
-
+        
             try
             {
-                _socket.Connect(Config.LocalEndPoint);
-
                 Console.WriteLine($"Socket connected to -> {_socket.RemoteEndPoint}");
                 
                 var firstResponseFromServer = _dataReceiver.GetData(_socket);
@@ -60,11 +53,5 @@ public  class ClientExecuter
             {
                 Console.WriteLine($"Exception: {exception}");
             }
-        }
-
-        catch (Exception exception)
-        {
-            Console.WriteLine(exception.ToString());
-        }
     }
 }

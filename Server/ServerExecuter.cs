@@ -1,7 +1,6 @@
 using System.Net.Sockets;
 using Newtonsoft.Json;
 using Server.Controllers;
-using Server.Controllers.UserHandlingControllers;
 using Server.Interfaces;
 using Server.Models;
 using Shared;
@@ -41,15 +40,12 @@ public class ServerExecuter
     
     public  void ExecuteServer()
     {
-       
+
         try
         {
-            _socket.Bind(Config.LocalEndPoint);
-            _socket.Listen(10);
-
             Console.WriteLine("Waiting connection ... ");
 
-            var clientSocket = _socket.Accept();
+            var clientSocket = _socket;
 
             Console.WriteLine("Connected");
 
