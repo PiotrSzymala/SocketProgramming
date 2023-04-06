@@ -10,6 +10,9 @@ namespace Client
         {
             Socket socket = new Socket(Config.IpAddr.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
+            
+            socket.Connect(Config.LocalEndPoint);
+            
             ClientExecuter clientExecuter = new ClientExecuter(new DataSender(), new DataReceiver(),socket);
             clientExecuter.ExecuteClient();
         }
