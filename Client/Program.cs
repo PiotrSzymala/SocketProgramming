@@ -12,8 +12,10 @@ namespace Client
                 SocketType.Stream, ProtocolType.Tcp);
             
             socket.Connect(Config.LocalEndPoint);
+
+            ITransferStructure transferStructure = new SocketSender(socket);
             
-            ClientExecuter clientExecuter = new ClientExecuter(new DataSender(), new DataReceiver(),socket);
+            IClientExecuter clientExecuter = new ClientExecuter(new DataSender(), new DataReceiver(transferStructure),transferStructure);
             clientExecuter.ExecuteClient();
         }
     }

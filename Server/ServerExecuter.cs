@@ -8,7 +8,7 @@ using Shared.Models;
 
 namespace Server;
 
-public class ServerExecuter
+public class ServerExecuter : IServerExecuter
 {
     public static readonly DateTime ServerCreationTime = DateTime.Now;
     public static List<User> Users = new List<User>();
@@ -22,9 +22,9 @@ public class ServerExecuter
     private IMessageSender _messageSender;
     private IMessageChecker _messageChecker;
     private IMessageBoxCleaner _messageBoxCleaner;
-    private Socket _socket;
+    private ITransferStructure _transferStructure;
 
-    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver, IUserCreator userCreator, IUserLogger userLogger, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner, Socket socket)
+    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver, IUserCreator userCreator, IUserLogger userLogger, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner, ITransferStructure transferStructure)
     {
         _dataSender = dataSender;
         _dataReceiver = dataReceiver;
@@ -35,7 +35,7 @@ public class ServerExecuter
         _messageSender = messageSender;
         _messageChecker = messageChecker;
         _messageBoxCleaner = messageBoxCleaner;
-        _socket = socket;
+        _transferStructure = transferStructure;
     }
     
     public  void ExecuteServer()
@@ -45,7 +45,7 @@ public class ServerExecuter
         {
             Console.WriteLine("Waiting connection ... ");
 
-            var clientSocket = _socket;
+            var transferStructure = _transferStructure;
 
             Console.WriteLine("Connected");
 
@@ -56,7 +56,7 @@ public class ServerExecuter
             Users = JsonConvert.DeserializeObject<List<User>>(usersListString);
 
             var message = _dataSender.SendData("\nLogin or register:\n");
-            clientSocket.Send(message);
+            transferStructure.Send(message);
 
             bool flag = true;
             bool logged = false;
@@ -67,7 +67,7 @@ public class ServerExecuter
             {
                 while (!logged)
                 {
-                    var reply = _dataReceiver.GetData(clientSocket);
+                    var reply = _dataReceiver.GetData();
 
                     switch (reply.ToLower())
                     {
@@ -79,18 +79,18 @@ public class ServerExecuter
                             break;
 
                         case "register":
-                            _userCreator.CreateUser();
+                            _userCreator.CreateUser(out User createdUser);
                             break;
 
                         default:
                             var wrong = _dataSender.SendData("wrong command");
-                            clientSocket.Send(wrong);
+                            transferStructure.Send(wrong);
                             break;
                     }
                 }
                 
 
-                var menu = GetMenu(currentlyLoggedUser.Privileges, clientSocket, currentlyLoggedUser);
+                var menu = GetMenu(currentlyLoggedUser.Privileges, transferStructure, currentlyLoggedUser);
                 
                 menu.DisplayMenu(ref flag, ref logged);
             }
@@ -103,12 +103,12 @@ public class ServerExecuter
         }
     }
 
-    private IMenu GetMenu(Privileges privileges, Socket socket, User user)
+    private IMenu GetMenu(Privileges privileges, ITransferStructure iTransferStructure, User user)
     =>
         privileges switch
         { 
-            Privileges.Admin => new AdminMenu(socket,_dataReceiver, _dataSender,user,_userPrivilegesChanger,_userRemover),
-            Privileges.User => new UserMenu(socket,_dataReceiver, _dataSender,user, _messageSender, _messageChecker,_messageBoxCleaner),
+            Privileges.Admin => new AdminMenu(iTransferStructure,_dataReceiver, _dataSender,user,_userPrivilegesChanger,_userRemover),
+            Privileges.User => new UserMenu(iTransferStructure,_dataReceiver, _dataSender,user, _messageSender, _messageChecker,_messageBoxCleaner),
             _ => throw  new NotImplementedException()
         };
 

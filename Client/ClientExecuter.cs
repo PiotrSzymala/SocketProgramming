@@ -3,26 +3,26 @@ using Shared;
 
 namespace Client;
 
-public  class ClientExecuter
+public  class ClientExecuter : IClientExecuter
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
-    private Socket _socket;
+    private ITransferStructure _transferStructure;
 
-    public ClientExecuter(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
+    public ClientExecuter(IDataSender dataSender, IDataReceiver dataReceiver, ITransferStructure transferStructure)
     {
         _dataSender = dataSender;
         _dataReceiver = dataReceiver;
-        _socket = socket;
+        _transferStructure = transferStructure;
     }
     public void ExecuteClient()
     {
         
             try
             {
-                Console.WriteLine($"Socket connected to -> {_socket.RemoteEndPoint}");
+                Console.WriteLine($"Connected");
                 
-                var firstResponseFromServer = _dataReceiver.GetData(_socket);
+                var firstResponseFromServer = _dataReceiver.GetData();
                 Console.WriteLine(firstResponseFromServer);
 
                 string response;
@@ -31,9 +31,9 @@ public  class ClientExecuter
                 {
                     var commandToSend = Console.ReadLine().ToLower();
                     var message = _dataSender.SendData(commandToSend);
-                    _socket.Send(message);
+                    _transferStructure.Send(message);
 
-                     response = _dataReceiver.GetData(_socket);
+                     response = _dataReceiver.GetData();
 
                     Console.WriteLine($"Response from Server -> {response}");
                 } while (response != "Shutting down...");

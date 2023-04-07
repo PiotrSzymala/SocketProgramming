@@ -2,7 +2,6 @@ using System.Net.Sockets;
 using Newtonsoft.Json;
 using Server.Interfaces;
 using Shared;
-using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.UserHandlingControllers;
@@ -11,19 +10,20 @@ public class UserPrivilegesChanger : IUserPrivilegesChanger
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
-    private Socket _socket;
-    public UserPrivilegesChanger(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
+    private ITransferStructure _transferStructure;
+
+    public UserPrivilegesChanger(IDataSender dataSender, IDataReceiver dataReceiver, ITransferStructure transferStructure)
     {
         _dataSender = dataSender;
         _dataReceiver = dataReceiver;
-        _socket = socket;
+        _transferStructure = transferStructure;
     }
     public void ChangePrivileges()
     {
         var message = _dataSender.SendData("Which user's privileges you want to change?");
-        _socket.Send(message);
+        _transferStructure.Send(message);
         
-        var username = _dataReceiver.GetData(_socket);
+        var username = _dataReceiver.GetData();
 
         var userToChangePrivileges = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
 
@@ -39,12 +39,12 @@ public class UserPrivilegesChanger : IUserPrivilegesChanger
             ListSaver.SaveList();
             
             message = _dataSender.SendData($"Privileges for {userToChangePrivileges.Username} changed.");
-            _socket.Send(message);
+            _transferStructure.Send(message);
         }
         else
         {
             message = _dataSender.SendData("User does not exist.");
-            _socket.Send(message);
+            _transferStructure.Send(message);
         }
     }
 }
