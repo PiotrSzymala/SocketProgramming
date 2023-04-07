@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using Server.Interfaces;
 using Shared;
 
 namespace Server
@@ -14,20 +15,22 @@ namespace Server
             
             socket = socket.Accept();
 
+            ITransferStructure transferStructure = new SocketSender(socket);
+
             var dataSender = Factory.CreateDataSender();
-            var dataReceiver = Factory.CreateDataReceiver();
+            var dataReceiver = Factory.CreateDataReceiver(transferStructure);
 
-            var userCreator = Factory.CreateUserCreator(socket);
-            var userLogger = Factory.CreateUserLogger(socket);
-            var userPrivilegesChanger = Factory.CreateUserUserPrivilegesChanger(socket);
-            var userRemover = Factory.CreateUserRemover(socket);
+            var userCreator = Factory.CreateUserCreator(transferStructure);
+            var userLogger = Factory.CreateUserLogger(transferStructure);
+            var userPrivilegesChanger = Factory.CreateUserUserPrivilegesChanger(transferStructure);
+            var userRemover = Factory.CreateUserRemover(transferStructure);
 
-            var messageSender = Factory.CreateMessageSender(socket);
-            var messageChecker = Factory.CreateMessageChecker(socket);
-            var messageBoxCleaner = Factory.CreateMessageBoxCleaner(socket);
+            var messageSender = Factory.CreateMessageSender(transferStructure);
+            var messageChecker = Factory.CreateMessageChecker(transferStructure);
+            var messageBoxCleaner = Factory.CreateMessageBoxCleaner(transferStructure);
 
-            ServerExecuter serverExecuter = new ServerExecuter(dataSender, dataReceiver, userCreator, userLogger,
-                userPrivilegesChanger, userRemover, messageSender, messageChecker, messageBoxCleaner, socket);
+            IServerExecuter serverExecuter = new ServerExecuter(dataSender, dataReceiver, userCreator, userLogger,
+                userPrivilegesChanger, userRemover, messageSender, messageChecker, messageBoxCleaner, transferStructure);
             
             serverExecuter.ExecuteServer();
         }
