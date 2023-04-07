@@ -7,12 +7,12 @@ namespace Server;
 public class Commands
 {
     private IDataSender _dataSender;
-    private Socket _socket;
+    private ITransferStructure _transferStructure;
 
-    public Commands(IDataSender dataSender, Socket socket)
+    public Commands(IDataSender dataSender, ITransferStructure transferStructure)
     {
         _dataSender = dataSender;
-        _socket = socket;
+        _transferStructure = transferStructure;
     }
     
     public void UptimeCommand()
@@ -22,7 +22,7 @@ public class Commands
         var message = $"Running time: {timeSpan}";
 
         var result = _dataSender.SendData(message);
-        _socket.Send(result);
+        _transferStructure.Send(result);
     }
 
     public void InfoCommand()
@@ -31,7 +31,7 @@ public class Commands
                       $"Server creation date: {ServerInformation.ServerCreationDate}\n";
         
         var result = _dataSender.SendData(message);
-        _socket.Send(result);
+        _transferStructure.Send(result);
     }
 
     public  void HelpCommand()
@@ -47,7 +47,7 @@ public class Commands
                       "stop - stop server and client running.\n";
                       
         var result = _dataSender.SendData(message);
-        _socket.Send(result);
+        _transferStructure.Send(result);
     }
 
     public  void HelpCommandForAdmin()
@@ -65,7 +65,7 @@ public class Commands
                       "stop - stop server and client running.\n";
                       
         var result = _dataSender.SendData(message);
-        _socket.Send(result);
+        _transferStructure.Send(result);
     }
     
     public  void StopCommand()
@@ -73,10 +73,10 @@ public class Commands
         var message = "Shutting down...";
         
         var result = _dataSender.SendData(message);
-        _socket.Send(result);
+        _transferStructure.Send(result);
         
-        _socket.Shutdown(SocketShutdown.Both);
-        _socket.Close();
+        _transferStructure.Shutdown();
+        _transferStructure.Close();
     }
 
     public  void WrongCommand()
@@ -84,6 +84,6 @@ public class Commands
         var message = "Wrong command\n";
        
         var result = _dataSender.SendData(message);
-        _socket.Send(result);
+        _transferStructure.Send(result);
     }
 }
