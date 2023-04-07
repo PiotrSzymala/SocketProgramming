@@ -1,7 +1,6 @@
 using System.Net.Sockets;
 using Server.Interfaces;
 using Shared;
-using Shared.Handlers;
 using Shared.Models;
 
 namespace Server.Controllers.MessageHandlingControllers;
@@ -10,19 +9,19 @@ public  class MessageChecker : IMessageChecker
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
-    private Socket _socket;
-    public MessageChecker(IDataSender dataSender, IDataReceiver dataReceiver, Socket socket)
+    private ITransferStructure _transferStructure;
+    public MessageChecker(IDataSender dataSender, IDataReceiver dataReceiver, ITransferStructure transferStructure)
     {
         _dataSender = dataSender;
         _dataReceiver = dataReceiver;
-        _socket = socket;
+        _transferStructure = transferStructure;
     }
     public  void CheckInbox(User currentlyLoggedUser)
     {
         if (currentlyLoggedUser.Inbox.Count == 0)
         {
             var message = _dataSender.SendData("Inbox is empty");
-            _socket.Send(message);
+            _transferStructure.Send(message);
         }
         else
         {
@@ -41,6 +40,6 @@ public  class MessageChecker : IMessageChecker
             counter++;
         }
         var messageInfo = _dataSender.SendData(test);
-        _socket.Send(messageInfo);
+        _transferStructure.Send(messageInfo);
     }
 }
