@@ -18,36 +18,36 @@ public static class Factory
     {
         return new DataSender();
     }
-    public static IDataReceiver CreateDataReceiver()
+    public static IDataReceiver CreateDataReceiver(ITransferStructure transferStructure)
     {
-        return new DataReceiver();
+        return new DataReceiver(transferStructure);
     }
-    public static IUserCreator CreateUserCreator(Socket socket)
+    public static IUserCreator CreateUserCreator(ITransferStructure transferStructure)
     {
-        return new UserCreator(CreateDataSender(),CreateDataReceiver(),socket);
+        return new UserCreator(CreateDataSender(),CreateDataReceiver(transferStructure),transferStructure);
     }
-    public static IUserLogger CreateUserLogger(Socket socket)
+    public static IUserLogger CreateUserLogger(ITransferStructure transferStructure)
     {
-        return new UserLogger(CreateDataSender(), CreateDataReceiver(), socket);
+        return new UserLogger(CreateDataSender(), CreateDataReceiver(transferStructure), transferStructure);
     }
-    public static IUserRemover CreateUserRemover(Socket socket)
+    public static IUserRemover CreateUserRemover(ITransferStructure transferStructure)
     {
-        return new UserRemover(CreateDataSender(),CreateDataReceiver(),socket);
+        return new UserRemover(CreateDataSender(),CreateDataReceiver(transferStructure),transferStructure);
     }
-    public static IUserPrivilegesChanger CreateUserUserPrivilegesChanger(Socket socket)
+    public static IUserPrivilegesChanger CreateUserUserPrivilegesChanger(ITransferStructure transferStructure)
     {
-        return new UserPrivilegesChanger(CreateDataSender(),CreateDataReceiver(),socket);
+        return new UserPrivilegesChanger(CreateDataSender(),CreateDataReceiver(transferStructure),transferStructure);
     }
-    public static IMessageBoxCleaner CreateMessageBoxCleaner(Socket socket)
+    public static IMessageBoxCleaner CreateMessageBoxCleaner(ITransferStructure transferStructure)
     {
-        return new MessageBoxCleaner(CreateDataSender(),CreateDataReceiver(),socket);
+        return new MessageBoxCleaner(CreateDataSender(),CreateDataReceiver(transferStructure),transferStructure);
     }
-    public static IMessageChecker CreateMessageChecker(Socket socket)
+    public static IMessageChecker CreateMessageChecker(ITransferStructure transferStructure)
     {
-        return new MessageChecker(CreateDataSender(),CreateDataReceiver(),socket);
+        return new MessageChecker(CreateDataSender(),CreateDataReceiver(transferStructure),transferStructure);
     }
-    public static IMessageSender CreateMessageSender(Socket socket)
+    public static IMessageSender CreateMessageSender(ITransferStructure transferStructure)
     {
-        return new MessageSender(CreateDataSender(), CreateDataReceiver(), socket);
+        return new MessageSender(CreateDataSender(), CreateDataReceiver(transferStructure), transferStructure);
     }
 }
