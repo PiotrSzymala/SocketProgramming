@@ -11,7 +11,8 @@ namespace Server.Models;
 public class AdminMenu : IMenu
 {
     
-    private Socket _socket;
+    
+    private ITransferStructure _transferStructure;
     private IDataReceiver _dataReceiver;
     private IDataSender _dataSender;
     private User _user;
@@ -19,9 +20,9 @@ public class AdminMenu : IMenu
     private IUserRemover _userRemover;
 
 
-    public AdminMenu(Socket socket, IDataReceiver dataReceiver, IDataSender dataSender, User user, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover)
+    public AdminMenu(ITransferStructure transferStructure, IDataReceiver dataReceiver, IDataSender dataSender, User user, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover )
     {
-        _socket = socket;
+        _transferStructure = transferStructure;
         _dataReceiver = dataReceiver;
         _dataSender = dataSender;
         _user = user;
@@ -31,23 +32,23 @@ public class AdminMenu : IMenu
 
     public void DisplayMenu(ref bool flag, ref bool logged)
     {
-        var deserializedRequestFromClient = _dataReceiver.GetData(_socket);
-        Commands commands = new Commands(_dataSender, _socket);
+        var deserializedRequestFromClient = _dataReceiver.GetData();
+        Commands commands = new Commands(_dataSender, _transferStructure);
         
         switch (deserializedRequestFromClient.ToLower())
         {
             case "send":
-                MessageSender messageSender = new MessageSender(_dataSender, _dataReceiver, _socket);
+                MessageSender messageSender = new MessageSender(_dataSender, _dataReceiver, _transferStructure);
                 messageSender.SendMessage(_user);
                 break;
             
             case "inbox":
-                MessageChecker messageChecker = new MessageChecker(_dataSender, _dataReceiver, _socket);
+                MessageChecker messageChecker = new MessageChecker(_dataSender, _dataReceiver, _transferStructure);
                 messageChecker.CheckInbox(_user);
                 break;
             
             case "clear":
-                MessageBoxCleaner messageBoxCleaner = new MessageBoxCleaner(_dataSender, _dataReceiver, _socket);
+                MessageBoxCleaner messageBoxCleaner = new MessageBoxCleaner(_dataSender, _dataReceiver, _transferStructure);
                 messageBoxCleaner.ClearInbox(_user);
                 break;
             
@@ -72,7 +73,7 @@ public class AdminMenu : IMenu
                 break;
 
             case "logout":
-                _socket.Send(_dataSender.SendData("Logged out!"));
+                _transferStructure.Send(_dataSender.SendData("Logged out!"));
                 logged = false;
                 break;
             
