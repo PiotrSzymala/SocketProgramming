@@ -4,5 +4,5 @@ namespace Shared;
 
 public interface IDataReceiver
 {
-     string GetData(Socket socket);
+     string GetData();
 }
