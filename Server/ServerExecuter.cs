@@ -11,8 +11,7 @@ namespace Server;
 public class ServerExecuter : IServerExecuter
 {
     public static readonly DateTime ServerCreationTime = DateTime.Now;
-    public static List<User> Users = new List<User>();
-    
+
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
     private IUserCreator _userCreator;
@@ -53,7 +52,7 @@ public class ServerExecuter : IServerExecuter
             CreateFileForUsers();
 
             string usersListString = File.ReadAllText("users/users.json");
-            Users = JsonConvert.DeserializeObject<List<User>>(usersListString);
+            ListSaver.Users = JsonConvert.DeserializeObject<List<User>>(usersListString);
 
             var message = _dataSender.SendData("\nLogin or register:\n");
             transferStructure.Send(message);

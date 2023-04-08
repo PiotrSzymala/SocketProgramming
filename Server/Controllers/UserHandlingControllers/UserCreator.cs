@@ -10,7 +10,6 @@ public class UserCreator : IUserCreator
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
-    //private Socket _socket;
     private ITransferStructure _transferStructure;
     public bool IsUserExist;
     public UserCreator(IDataSender dataSender, IDataReceiver dataReceiver, ITransferStructure transferStructure)
@@ -23,10 +22,13 @@ public class UserCreator : IUserCreator
     {
         var message = _dataSender.SendData("Set username");
         _transferStructure.Send(message);
-        createdUser = new User();
+       
         var username = _dataReceiver.GetData();
+        createdUser = null;
         
-        if (!File.Exists($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{username}.json"))
+        var searchedUser = ListSaver.Users.FirstOrDefault(x => x.Username.Equals(username));
+        
+        if (!ListSaver.Users.Contains(searchedUser))
         {
             message = _dataSender.SendData("Set password");
             _transferStructure.Send(message);
@@ -40,9 +42,8 @@ public class UserCreator : IUserCreator
             var privileges = (specialPassword == "root123" ? Privileges.Admin : Privileges.User);
             
             var user = new User(username, password, privileges, new List<MessageToUser>());
-            ServerExecuter.Users.Add(user);
+            ListSaver.Users.Add(user);
 
-            createdUser = user;
             
             using (StreamWriter file = File.CreateText($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{username}.json"))
             {
@@ -51,19 +52,19 @@ public class UserCreator : IUserCreator
             }
             ListSaver.SaveList();
 
+            createdUser = user;
+            
             var typeOfUser = user.Privileges == Privileges.Admin ? "Admin created" : "User created";
                 
+            IsUserExist = false;
             message = _dataSender.SendData(typeOfUser);
             _transferStructure.Send(message);
-            IsUserExist = false;
         }
         else
         {
+            IsUserExist = true;
             message = _dataSender.SendData("User already exists!");
             _transferStructure.Send(message);
-            IsUserExist = true;
         }
-
-        
     }
 }

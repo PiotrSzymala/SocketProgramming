@@ -24,9 +24,9 @@ public  class MessageSender : IMessageSender
 
         var username = _dataReceiver.GetData();
 
-        var userToSendMessage = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
+        var userToSendMessage = ListSaver.Users.FirstOrDefault(u => u.Username.Equals(username));
 
-        if (ServerExecuter.Users.Contains(userToSendMessage))
+        if (ListSaver.Users.Contains(userToSendMessage))
         {
             if (userToSendMessage.Inbox.Count >= 5 && userToSendMessage.Privileges != Privileges.Admin)
             {

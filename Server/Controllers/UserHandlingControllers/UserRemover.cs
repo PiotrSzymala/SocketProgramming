@@ -22,12 +22,12 @@ public  class UserRemover : IUserRemover
 
         var username = _dataReceiver.GetData();
 
-        var userToDelete = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
+        var userToDelete = ListSaver.Users.FirstOrDefault(u => u.Username.Equals(username));
 
-        if (ServerExecuter.Users.Contains(userToDelete))
+        if (ListSaver.Users.Contains(userToDelete))
         {
             File.Delete($"users/{userToDelete.Username}.json");
-            ServerExecuter.Users.Remove(userToDelete);
+            ListSaver.Users.Remove(userToDelete);
             
             ListSaver.SaveList();
             
