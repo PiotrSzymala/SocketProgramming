@@ -11,6 +11,8 @@ public  class MessageSender : IMessageSender
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
     private ITransferStructure _transferStructure;
+    public bool MessageSendSucces;
+    public bool IsInboxFull;
     public MessageSender(IDataSender dataSender, IDataReceiver dataReceiver, ITransferStructure transferStructure)
     {
         _dataSender = dataSender;
@@ -32,6 +34,8 @@ public  class MessageSender : IMessageSender
             {
                 message = _dataSender.SendData($"The inbox of {userToSendMessage.Username} is full.");
                 _transferStructure.Send(message);
+
+                IsInboxFull = true;
             }
             else
             {
@@ -46,7 +50,7 @@ public  class MessageSender : IMessageSender
                     MessageContent = messageContent
                 });
                 
-                using (StreamWriter file = File.CreateText($"users/{userToSendMessage.Username}.json"))
+                using (StreamWriter file = File.CreateText($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{userToSendMessage.Username}.json"))
                 {
                     var result = JsonConvert.SerializeObject(userToSendMessage);
                     file.Write(result);
@@ -55,12 +59,16 @@ public  class MessageSender : IMessageSender
                 
                 message = _dataSender.SendData("The message has been sent.");
                 _transferStructure.Send(message);
+
+                MessageSendSucces = true;
             }
         }
         else
         {
             message = _dataSender.SendData("User does not exist.");
             _transferStructure.Send(message);
+
+            MessageSendSucces = false;
         }
     }
 }
