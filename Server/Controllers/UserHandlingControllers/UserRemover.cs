@@ -9,6 +9,7 @@ public  class UserRemover : IUserRemover
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
     private ITransferStructure _transferStructure;
+    public bool UserRemoveSuccess;
     public UserRemover(IDataSender dataSender, IDataReceiver dataReceiver, ITransferStructure transferStructure)
     {
         _dataSender = dataSender;
@@ -26,18 +27,22 @@ public  class UserRemover : IUserRemover
 
         if (ListSaver.Users.Contains(userToDelete))
         {
-            File.Delete($"users/{userToDelete.Username}.json");
+            File.Delete($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{userToDelete.Username}.json");
             ListSaver.Users.Remove(userToDelete);
             
             ListSaver.SaveList();
             
             message = _dataSender.SendData("User has been deleted.");
             _transferStructure.Send(message);
+
+            UserRemoveSuccess = true;
         }
         else
         {
             message = _dataSender.SendData("User does not exist.");
             _transferStructure.Send(message);
+
+            UserRemoveSuccess = false;
         }
     }
 }

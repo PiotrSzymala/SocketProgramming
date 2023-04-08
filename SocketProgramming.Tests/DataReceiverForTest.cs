@@ -20,6 +20,11 @@ public class DataReceiverForTest : IDataReceiver
     {
         _inputs = new string[] { name, password};
     }
+    
+    public DataReceiverForTest(string name)
+    {
+        _inputs = new string[] { name };
+    }
 
     public string GetData()
     {

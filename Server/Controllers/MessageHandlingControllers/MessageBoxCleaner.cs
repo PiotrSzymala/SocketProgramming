@@ -12,6 +12,7 @@ public class MessageBoxCleaner : IMessageBoxCleaner
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
     private ITransferStructure _transferStructure;
+    public bool CleaningSuccess;
     public MessageBoxCleaner(IDataSender dataSender, IDataReceiver dataReceiver, ITransferStructure transferStructure)
     {
         _dataSender = dataSender;
@@ -30,7 +31,7 @@ public class MessageBoxCleaner : IMessageBoxCleaner
         {
             currentlyLoggedUser.Inbox.Clear();
             
-            using (StreamWriter file = File.CreateText($"users/{currentlyLoggedUser.Username}.json"))
+            using (StreamWriter file = File.CreateText($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{currentlyLoggedUser.Username}.json"))
             {
                 var result = JsonConvert.SerializeObject(currentlyLoggedUser);
                 file.Write(result);
@@ -40,11 +41,15 @@ public class MessageBoxCleaner : IMessageBoxCleaner
             
             message = _dataSender.SendData("All messages deleted.");
             _transferStructure.Send(message);
+
+            CleaningSuccess = true;
         }
         else
         {
             message = _dataSender.SendData("Deleting canceled.");
             _transferStructure.Send(message);
+
+            CleaningSuccess = false;
         }
     }
 }
