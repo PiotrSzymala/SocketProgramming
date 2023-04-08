@@ -11,7 +11,6 @@ public class UserLogger : IUserLogger
 {
     private IDataSender _dataSender;
     private IDataReceiver _dataReceiver;
-    //private Socket _socket;
     private ITransferStructure _transferStructure;
     public UserLogger(IDataSender dataSender, IDataReceiver dataReceiver, ITransferStructure transferStructure)
     {
@@ -27,11 +26,11 @@ public class UserLogger : IUserLogger
         var username = _dataReceiver.GetData();
         loggedUser = null;
 
-        var user = ServerExecuter.Users.FirstOrDefault(x => x.Username.Equals(username));
+        var user = ListSaver.Users.FirstOrDefault(x => x.Username.Equals(username));
         
-        if (ServerExecuter.Users.Contains(user))
+        if (ListSaver.Users.Contains(user))
         {
-            var json = File.ReadAllText($"users/{username}.json");
+            var json = File.ReadAllText($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{username}.json");
             var deserializedUser = JsonConvert.DeserializeObject<User>(json);
             
             message = _dataSender.SendData("Passsword:");
