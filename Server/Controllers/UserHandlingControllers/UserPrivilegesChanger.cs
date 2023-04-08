@@ -31,7 +31,7 @@ public class UserPrivilegesChanger : IUserPrivilegesChanger
         {
             userToChangePrivileges.Privileges = userToChangePrivileges.Privileges == Privileges.Admin ? Privileges.User : Privileges.Admin;
             
-            using (StreamWriter file = File.CreateText($"users/{userToChangePrivileges.Username}.json"))
+            using (StreamWriter file = File.CreateText($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{userToChangePrivileges.Username}.json"))
             {
                 var result = JsonConvert.SerializeObject(userToChangePrivileges);
                 file.Write(result);
