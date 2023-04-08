@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Sockets;
 using Server.Controllers;
 using Server.Controllers.UserHandlingControllers;
@@ -39,6 +40,8 @@ public class UserCreatorClassTests
        File.Delete($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{name}.json");
 
        ListSaver.Users.Remove(user);
+       
+       socket.Shutdown(SocketShutdown.Both);
        socket.Close();
     }
 
@@ -50,10 +53,14 @@ public class UserCreatorClassTests
      {
          // arrange
          
-         var socket = new Socket(Config.IpAddr.AddressFamily,
+         IPHostEntry ipHost = Dns.GetHostEntry(Dns.GetHostName());
+         IPAddress ipAddr = ipHost.AddressList[0];
+         IPEndPoint localEndPoint = new IPEndPoint(ipAddr, 11111);
+         
+         var socket = new Socket(ipAddr.AddressFamily,
              SocketType.Stream, ProtocolType.Tcp);
 
-         socket.Connect(Config.LocalEndPoint);
+         socket.Connect(localEndPoint);
 
          SocketSender sender = new SocketSender(socket);
 
@@ -71,8 +78,8 @@ public class UserCreatorClassTests
          File.Delete($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{name}.json");
          ListSaver.Users.Remove(user);
          
+         socket.Shutdown(SocketShutdown.Both);
          socket.Close();
-
      }
      
      [Theory]
@@ -106,7 +113,7 @@ public class UserCreatorClassTests
          File.Delete($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{name}.json");
          ListSaver.Users.Remove(testUser);
          
-         
+         socket.Shutdown(SocketShutdown.Both);
          socket.Close();
      }
 }

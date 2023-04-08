@@ -35,6 +35,7 @@ public class UserLoggerClassTests
         // assert
         Assert.Equal(null, user);
         
+        socket.Shutdown(SocketShutdown.Both);
         socket.Close();
 
     }
@@ -71,7 +72,8 @@ public class UserLoggerClassTests
         File.Delete($"/Users/piotrszymala/RiderProjects/SocketProgramming/Server/bin/Debug/net7.0/users/{name}.json");
         
         ListSaver.Users.Remove(createdUser);
-        
+       
+        socket.Shutdown(SocketShutdown.Both);
         socket.Close();
 
     }
