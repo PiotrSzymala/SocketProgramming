@@ -25,9 +25,9 @@ public class UserPrivilegesChanger : IUserPrivilegesChanger
         
         var username = _dataReceiver.GetData();
 
-        var userToChangePrivileges = ServerExecuter.Users.FirstOrDefault(u => u.Username.Equals(username));
+        var userToChangePrivileges = ListSaver.Users.FirstOrDefault(u => u.Username.Equals(username));
 
-        if (ServerExecuter.Users.Contains(userToChangePrivileges))
+        if (ListSaver.Users.Contains(userToChangePrivileges))
         {
             userToChangePrivileges.Privileges = userToChangePrivileges.Privileges == Privileges.Admin ? Privileges.User : Privileges.Admin;
             
