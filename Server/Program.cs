@@ -29,8 +29,10 @@ namespace Server
             var messageChecker = Factory.CreateMessageChecker(transferStructure);
             var messageBoxCleaner = Factory.CreateMessageBoxCleaner(transferStructure);
 
+            var logger = Factory.CreateLogger();
+
             IServerExecuter serverExecuter = new ServerExecuter(dataSender, dataReceiver, userCreator, userLogger,
-                userPrivilegesChanger, userRemover, messageSender, messageChecker, messageBoxCleaner, transferStructure);
+                userPrivilegesChanger, userRemover, messageSender, messageChecker, messageBoxCleaner, transferStructure,logger);
             
             serverExecuter.ExecuteServer();
         }

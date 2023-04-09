@@ -22,8 +22,9 @@ public class ServerExecuter : IServerExecuter
     private IMessageChecker _messageChecker;
     private IMessageBoxCleaner _messageBoxCleaner;
     private ITransferStructure _transferStructure;
+    private ILogger _logger;
 
-    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver, IUserCreator userCreator, IUserLogger userLogger, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner, ITransferStructure transferStructure)
+    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver, IUserCreator userCreator, IUserLogger userLogger, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner, ITransferStructure transferStructure, ILogger logger)
     {
         _dataSender = dataSender;
         _dataReceiver = dataReceiver;
@@ -35,6 +36,7 @@ public class ServerExecuter : IServerExecuter
         _messageChecker = messageChecker;
         _messageBoxCleaner = messageBoxCleaner;
         _transferStructure = transferStructure;
+        _logger = logger;
     }
     
     public  void ExecuteServer()
@@ -97,6 +99,7 @@ public class ServerExecuter : IServerExecuter
 
         catch (Exception exception)
         {
+            _logger.WriteError(exception);
             Console.WriteLine($"Exception: {exception}");
             ListSaver.SaveList();
         }
