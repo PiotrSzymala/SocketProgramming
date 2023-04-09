@@ -50,4 +50,8 @@ public static class Factory
     {
         return new MessageSender(CreateDataSender(), CreateDataReceiver(transferStructure), transferStructure);
     }
+    public static ILogger CreateLogger()
+    {
+        return new Logger();
+    }
 }
