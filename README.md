@@ -27,3 +27,6 @@ For regular user:
 * ```help``` - returns list of possible commands with short description.
 * ```logout``` - log user out from his account.
 * ```stop``` - stops server and client running.
+
+## Tests
+Thanks to the appliance of the Dependency Inversion in my solution, code can be easily tested. For now, there are almost 40 tests, including all modules of my app. I have created my mock implementation of the data transfer interface to simulate client input.
