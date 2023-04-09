@@ -14,8 +14,10 @@ namespace Client
             socket.Connect(Config.LocalEndPoint);
 
             ITransferStructure transferStructure = new SocketSender(socket);
+            ILogger logger = new Logger();
             
-            IClientExecuter clientExecuter = new ClientExecuter(new DataSender(), new DataReceiver(transferStructure),transferStructure);
+            
+            IClientExecuter clientExecuter = new ClientExecuter(new DataSender(), new DataReceiver(transferStructure),transferStructure,logger);
             clientExecuter.ExecuteClient();
         }
     }
