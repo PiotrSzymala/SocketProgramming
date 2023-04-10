@@ -1,8 +1,8 @@
 using Shared;
 
-namespace SocektProgramming.Tests;
+namespace SocketProgramming.Tests;
 
-public class LoggerImplementatnionTests
+public class LoggerImplementationTests
 {
     [Fact]
     public void LoggerTest()

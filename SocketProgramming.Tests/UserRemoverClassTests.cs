@@ -32,7 +32,7 @@ public class UserRemoverClassTests
         var userRemover= new UserRemover(new DataSender(),dataReceiverForRemover,sender);
         
         // act
-        userCreator.CreateUser(out User createdUser);
+        var createdUser = userCreator.CreateUser();
         
         
         // assert

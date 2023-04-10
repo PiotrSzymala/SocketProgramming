@@ -35,7 +35,7 @@ public class MessageBoxCleanerClassTest
         var messageBoxCleaner= new MessageBoxCleaner(new DataSender(),dataReceiverForCleaner,sender);
         
         // act
-        userCreator.CreateUser(out User createdUser);
+       var createdUser = userCreator.CreateUser();
         var initialNumberOfMessages = createdUser.Inbox.Count;
         
         messageSender.SendMessage(createdUser);
@@ -83,7 +83,7 @@ public class MessageBoxCleanerClassTest
         
         // act
         
-        userCreator.CreateUser(out User createdUser);
+        var createdUser = userCreator.CreateUser();
         messageBoxCleaner.ClearInbox(createdUser);
         
         // assert
