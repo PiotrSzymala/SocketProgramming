@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Shared.Models;
 
-public class User
+public class User : IUser
 {
     [JsonProperty("username")]
     public string Username { get; set; }
