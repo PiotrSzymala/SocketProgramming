@@ -80,7 +80,7 @@ public class ServerExecuter : IServerExecuter
                             break;
 
                         case "register":
-                            _userCreator.CreateUser(out User createdUser);
+                            _userCreator.CreateUser();
                             break;
 
                         default:
