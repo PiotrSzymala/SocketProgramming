@@ -18,14 +18,13 @@ public class UserCreator : IUserCreator
         _dataReceiver = dataReceiver;
         _transferStructure = transferStructure;
     }
-    public void CreateUser(out User createdUser)
+    public User CreateUser()
     {
         var message = _dataSender.SendData("Set username");
         _transferStructure.Send(message);
        
         var username = _dataReceiver.GetData();
-        createdUser = null;
-        
+
         var searchedUser = ListSaver.Users.FirstOrDefault(x => x.Username.Equals(username));
         
         if (!ListSaver.Users.Contains(searchedUser))
@@ -52,19 +51,18 @@ public class UserCreator : IUserCreator
             }
             ListSaver.SaveList();
 
-            createdUser = user;
-            
             var typeOfUser = user.Privileges == Privileges.Admin ? "Admin created" : "User created";
                 
             IsUserExist = false;
             message = _dataSender.SendData(typeOfUser);
             _transferStructure.Send(message);
+
+            return user;
         }
-        else
-        {
-            IsUserExist = true;
-            message = _dataSender.SendData("User already exists!");
-            _transferStructure.Send(message);
-        }
+        
+        IsUserExist = true;
+        message = _dataSender.SendData("User already exists!");
+        _transferStructure.Send(message);
+        return null;
     }
 }

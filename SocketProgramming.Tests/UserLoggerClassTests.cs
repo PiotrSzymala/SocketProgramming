@@ -62,7 +62,7 @@ public class UserLoggerClassTests
         var userLogger = new UserLogger(new DataSender(),dataReceiverForLogger,sender);
         
         // act
-        userCreator.CreateUser(out User createdUser);
+       var createdUser = userCreator.CreateUser();
         userLogger.LogUserIn(out User resultOfLogging);
         
         // assert

@@ -30,7 +30,7 @@ public class UserCreatorClassTests
         var userCreator = new UserCreator(new DataSender(),dataReceiverForTest,sender);
         
         // act
-        userCreator.CreateUser(out User user);
+       var user = userCreator.CreateUser();
 
 
         // assert
@@ -69,7 +69,7 @@ public class UserCreatorClassTests
          var userCreator = new UserCreator(new DataSender(),dataReceiverForTest,sender);
 
          //act
-         userCreator.CreateUser(out User user);
+         var user = userCreator.CreateUser();
          
          //asert
          Assert.Equal(false,userCreator.IsUserExist);
@@ -104,7 +104,7 @@ public class UserCreatorClassTests
         var userCreator = new UserCreator(new DataSender(),dataReceiverForTest,sender);
 
          //act
-         userCreator.CreateUser(out User user);
+         userCreator.CreateUser();
          
          //asert
          Assert.Equal(true,userCreator.IsUserExist);

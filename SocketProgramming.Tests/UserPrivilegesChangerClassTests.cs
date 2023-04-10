@@ -32,7 +32,7 @@ public class UserPrivilegesChangerClassTests
         var userPrivilegesChanger= new UserPrivilegesChanger(new DataSender(),dataReceiverForPrivilegesChanger,sender);
         
         // act
-        userCreator.CreateUser(out User createdUser);
+        var createdUser =  userCreator.CreateUser();
         var beginPrivileges = createdUser.Privileges;
         
         userPrivilegesChanger.ChangePrivileges();

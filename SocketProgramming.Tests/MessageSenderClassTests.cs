@@ -36,7 +36,7 @@ public class MessageSenderClassTests
         
         
         // act
-        userCreator.CreateUser(out User createdUser);
+        var createdUser = userCreator.CreateUser();
 
         for (int i = 0; i <= 6; i++)
         {
