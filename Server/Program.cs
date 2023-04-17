@@ -1,6 +1,7 @@
 ﻿using System.Net.Sockets;
 using Server.Interfaces;
 using Shared;
+using Shared.Models;
 
 namespace Server
 {
@@ -16,6 +17,7 @@ namespace Server
             socket = socket.Accept();
 
             ITransferStructure transferStructure = new SocketSender(socket);
+            IDisposeStructure disposeStructure = new SocketSender(socket);
 
             var dataSender = Factory.CreateDataSender();
             var dataReceiver = Factory.CreateDataReceiver(transferStructure);
@@ -28,11 +30,13 @@ namespace Server
             var messageSender = Factory.CreateMessageSender(transferStructure);
             var messageChecker = Factory.CreateMessageChecker(transferStructure);
             var messageBoxCleaner = Factory.CreateMessageBoxCleaner(transferStructure);
+            
+           
 
             var logger = Factory.CreateLogger();
 
             IServerExecuter serverExecuter = new ServerExecuter(dataSender, dataReceiver, userCreator, userLogger,
-                userPrivilegesChanger, userRemover, messageSender, messageChecker, messageBoxCleaner, transferStructure,logger);
+                userPrivilegesChanger, userRemover, messageSender, messageChecker, messageBoxCleaner, transferStructure,logger, disposeStructure );
             
             serverExecuter.ExecuteServer();
         }

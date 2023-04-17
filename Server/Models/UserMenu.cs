@@ -18,7 +18,9 @@ public class UserMenu : IMenu
     private IMessageSender _messageSender;
     private IMessageChecker _messageChecker;
     private IMessageBoxCleaner _messageBoxCleaner;
-    public UserMenu(ITransferStructure transferStructure, IDataReceiver dataReceiver, IDataSender dataSender, User user, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner)
+    private IDisposeStructure _disposeStructure;
+    
+    public UserMenu(ITransferStructure transferStructure, IDataReceiver dataReceiver, IDataSender dataSender, User user, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner, IDisposeStructure disposeStructure)
     {
         _transferStructure = transferStructure;
         _dataReceiver = dataReceiver;
@@ -27,12 +29,13 @@ public class UserMenu : IMenu
         _messageSender = messageSender;
         _messageChecker = messageChecker;
         _messageBoxCleaner = messageBoxCleaner;
+        _disposeStructure = disposeStructure;
     }
 
     public  void DisplayMenu( ref bool flag, ref bool logged)
     {
         var deserializedRequestFromClient = _dataReceiver.GetData();
-        Commands commands = new Commands(_dataSender, _transferStructure);
+        Commands commands = new Commands(_dataSender, _transferStructure,_disposeStructure);
         switch (deserializedRequestFromClient.ToLower())
         {
             case "send":

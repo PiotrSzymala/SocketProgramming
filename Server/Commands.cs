@@ -1,6 +1,7 @@
 using System.Net.Sockets;
 using Server.Models;
 using Shared;
+using Shared.Models;
 
 namespace Server;
 
@@ -8,11 +9,13 @@ public class Commands
 {
     private IDataSender _dataSender;
     private ITransferStructure _transferStructure;
+    private IDisposeStructure _disposeStructure;
 
-    public Commands(IDataSender dataSender, ITransferStructure transferStructure)
+    public Commands(IDataSender dataSender, ITransferStructure transferStructure, IDisposeStructure disposeStructure)
     {
         _dataSender = dataSender;
         _transferStructure = transferStructure;
+        _disposeStructure = disposeStructure;
     }
     
     public void UptimeCommand()
@@ -75,8 +78,8 @@ public class Commands
         var result = _dataSender.SendData(message);
         _transferStructure.Send(result);
         
-        _transferStructure.Shutdown();
-        _transferStructure.Close();
+        _disposeStructure.Shutdown();
+        _disposeStructure.Close();
     }
 
     public  void WrongCommand()

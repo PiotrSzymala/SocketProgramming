@@ -18,9 +18,9 @@ public class AdminMenu : IMenu
     private User _user;
     private IUserPrivilegesChanger _userPrivilegesChanger;
     private IUserRemover _userRemover;
+    private IDisposeStructure _disposeStructure;
 
-
-    public AdminMenu(ITransferStructure transferStructure, IDataReceiver dataReceiver, IDataSender dataSender, User user, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover )
+    public AdminMenu(ITransferStructure transferStructure, IDataReceiver dataReceiver, IDataSender dataSender, User user, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover, IDisposeStructure disposeStructure)
     {
         _transferStructure = transferStructure;
         _dataReceiver = dataReceiver;
@@ -28,12 +28,13 @@ public class AdminMenu : IMenu
         _user = user;
         _userPrivilegesChanger = userPrivilegesChanger;
         _userRemover = userRemover;
+        _disposeStructure = disposeStructure;
     }
 
     public void DisplayMenu(ref bool flag, ref bool logged)
     {
         var deserializedRequestFromClient = _dataReceiver.GetData();
-        Commands commands = new Commands(_dataSender, _transferStructure);
+        Commands commands = new Commands(_dataSender, _transferStructure,_disposeStructure);
         
         switch (deserializedRequestFromClient.ToLower())
         {

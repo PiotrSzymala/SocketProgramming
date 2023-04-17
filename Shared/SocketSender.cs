@@ -1,8 +1,9 @@
 using System.Net.Sockets;
+using Shared.Models;
 
 namespace Shared;
 
-public class SocketSender : ITransferStructure
+public class SocketSender : ITransferStructure, IDisposeStructure
 {
     public Socket _socket;
     public SocketSender(Socket socket)

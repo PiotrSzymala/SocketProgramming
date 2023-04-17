@@ -23,8 +23,9 @@ public class ServerExecuter : IServerExecuter
     private IMessageBoxCleaner _messageBoxCleaner;
     private ITransferStructure _transferStructure;
     private ILogger _logger;
+    private IDisposeStructure _disposeStructure;
 
-    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver, IUserCreator userCreator, IUserLogger userLogger, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner, ITransferStructure transferStructure, ILogger logger)
+    public ServerExecuter(IDataSender dataSender, IDataReceiver dataReceiver, IUserCreator userCreator, IUserLogger userLogger, IUserPrivilegesChanger userPrivilegesChanger, IUserRemover userRemover, IMessageSender messageSender, IMessageChecker messageChecker, IMessageBoxCleaner messageBoxCleaner, ITransferStructure transferStructure, ILogger logger, IDisposeStructure disposeStructure)
     {
         _dataSender = dataSender;
         _dataReceiver = dataReceiver;
@@ -37,6 +38,7 @@ public class ServerExecuter : IServerExecuter
         _messageBoxCleaner = messageBoxCleaner;
         _transferStructure = transferStructure;
         _logger = logger;
+        _disposeStructure = disposeStructure;
     }
     
     public  void ExecuteServer()
@@ -109,8 +111,8 @@ public class ServerExecuter : IServerExecuter
     =>
         privileges switch
         { 
-            Privileges.Admin => new AdminMenu(iTransferStructure,_dataReceiver, _dataSender,user,_userPrivilegesChanger,_userRemover),
-            Privileges.User => new UserMenu(iTransferStructure,_dataReceiver, _dataSender,user, _messageSender, _messageChecker,_messageBoxCleaner),
+            Privileges.Admin => new AdminMenu(iTransferStructure,_dataReceiver, _dataSender,user,_userPrivilegesChanger,_userRemover,_disposeStructure),
+            Privileges.User => new UserMenu(iTransferStructure,_dataReceiver, _dataSender,user, _messageSender, _messageChecker,_messageBoxCleaner,_disposeStructure),
             _ => throw  new NotImplementedException()
         };
 
