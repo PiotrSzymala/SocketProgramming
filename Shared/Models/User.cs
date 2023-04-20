@@ -4,6 +4,8 @@ namespace Shared.Models;
 
 public class User : IUser
 {
+    public int Id { get; set; }
+
     [JsonProperty("username")]
     public string Username { get; set; }
     
