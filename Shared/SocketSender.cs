@@ -10,10 +10,10 @@ public class SocketSender : ITransferStructure, IDisposeStructure
     {
         _socket = socket;
     }
-
-    public void Send(byte[] data)
+    
+    public void Send<T>(T data)
     {
-        _socket.Send(data);
+        _socket.Send(data as byte[]);
     }
 
     public int Receive(byte[] data)
